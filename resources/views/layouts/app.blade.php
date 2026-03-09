@@ -33,8 +33,7 @@
             apiUrl: '{{ url("/api") }}',
             csrfToken: '{{ csrf_token() }}',
             votePrice: {{ config('concours.vote_price', 100) }},
-            currency: '{{ config("concours.currency", "XOF") }}',
-            paymentSimulation: {{ config('concours.payment_simulation', false) ? 'true' : 'false' }}
+            currency: '{{ config("concours.currency", "XOF") }}'
         };
     </script>
     <script src="{{ asset('js/app.js') }}"></script>

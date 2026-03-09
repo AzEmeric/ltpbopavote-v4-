@@ -21,7 +21,7 @@ class VoteController extends Controller
         $validator = Validator::make($request->all(), [
             'candidat_id' => 'required|integer|exists:candidats,id',
             'nombre_votes' => 'required|integer|min:1|max:100',
-            'telephone' => 'required|string|min:8|max:20',
+            'telephone' => 'nullable|string|min:8|max:20',
         ]);
 
         if ($validator->fails()) {

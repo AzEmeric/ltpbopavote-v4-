@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
-    public function __construct(
-        private MonerooService $monerooService
-    ) {}
+    private function moneroo(): MonerooService
+    {
+        return app(MonerooService::class);
+    }
 
     /**
      * Initier un paiement pour un vote
@@ -46,7 +47,7 @@ class PaymentController extends Controller
                 ], 400);
             }
 
-            $result = $this->monerooService->initierPaiementVote($vote);
+            $result = $this->moneroo()->initierPaiementVote($vote);
 
             return response()->json([
                 'success' => true,
@@ -76,7 +77,6 @@ class PaymentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'montant' => 'required|integer|min:' . config('concours.min_don', 100),
-            'telephone' => 'required|string|min:8|max:20',
             'nom_donateur' => 'nullable|string|max:100',
             'message' => 'nullable|string|max:500',
         ]);
@@ -100,7 +100,7 @@ class PaymentController extends Controller
                 ]);
             });
 
-            $result = $this->monerooService->initierPaiementDon($don);
+            $result = $this->moneroo()->initierPaiementDon($don);
 
             return response()->json([
                 'success' => true,
@@ -132,7 +132,7 @@ class PaymentController extends Controller
         $signature = $request->header('X-Moneroo-Signature', '');
         $rawPayload = $request->getContent();
 
-        if (!$this->monerooService->verifierSignature($rawPayload, $signature)) {
+        if (!$this->moneroo()->verifierSignature($rawPayload, $signature)) {
             Log::warning('Webhook Moneroo : signature invalide', [
                 'ip' => $request->ip(),
             ]);
@@ -146,7 +146,7 @@ class PaymentController extends Controller
                 'moneroo_id' => $request->input('data.id'),
             ]);
 
-            $this->monerooService->traiterWebhook($request->all());
+            $this->moneroo()->traiterWebhook($request->all());
 
             return response()->json(['success' => true]);
 
@@ -178,7 +178,7 @@ class PaymentController extends Controller
 
         try {
             // Vérifier directement via l'API Moneroo (ne pas se fier au query param)
-            $reussi = $this->monerooService->verifierPaiement($paymentId);
+            $reussi = $this->moneroo()->verifierPaiement($paymentId);
 
             $transaction = Transaction::where('moneroo_id', $paymentId)->first();
 
@@ -222,7 +222,7 @@ class PaymentController extends Controller
         }
 
         try {
-            $resultats = $this->monerooService->rechercherParTelephone($request->telephone);
+            $resultats = $this->moneroo()->rechercherParTelephone($request->telephone);
 
             return response()->json([
                 'success' => true,

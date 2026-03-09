@@ -40,14 +40,6 @@
                         </div>
                     </div>
 
-                    <div class="donation-phone-group">
-                        <p class="donation-label">Numero Mobile Money</p>
-                        <div class="donation-input-wrap donation-input-wrap--full">
-                            <span class="donation-phone-prefix">+229</span>
-                            <input type="tel" id="donationPhone" class="donation-input donation-input--phone" placeholder="96 00 00 00" maxlength="11">
-                        </div>
-                    </div>
-
                     <button class="btn-donate" id="btnDonate" onclick="processDonation()">
                         <i class="fas fa-heart"></i>
                         <span>Faire un don</span>

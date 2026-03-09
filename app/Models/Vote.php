@@ -170,7 +170,7 @@ class Vote extends Model
 
         // Après la mise à jour vers "réussi", incrémenter les votes du candidat
         static::updated(function ($vote) {
-            if ($vote->isDirty('statut_paiement') && $vote->statut_paiement === self::STATUT_REUSSI) {
+            if ($vote->wasChanged('statut_paiement') && $vote->statut_paiement === self::STATUT_REUSSI) {
                 $vote->candidat->incrementVotes($vote->nombre_votes);
             }
         });

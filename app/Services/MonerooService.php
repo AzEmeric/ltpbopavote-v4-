@@ -7,7 +7,7 @@ use App\Models\Don;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Moneroo\Payment as MonerooPayment;
+use Moneroo\Laravel\Payment as MonerooPayment;
 
 class MonerooService
 {
@@ -91,7 +91,7 @@ class MonerooService
                 'email' => 'donateur@awards-ltpbopa.bj',
                 'first_name' => $don->nom_donateur ?? 'Donateur',
                 'last_name' => 'Anonyme',
-                'phone' => $don->telephone,
+                'phone' => $don->telephone ?? '',
             ],
             'return_url' => url(config('concours.moneroo.return_url', '/paiement/retour')),
             'metadata' => $metadata,

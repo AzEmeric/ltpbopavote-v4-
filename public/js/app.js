@@ -350,41 +350,27 @@ async function processPayment() {
 
         const voteId = voteData.vote_id;
 
-        // 2. Paiement
-        if (CONFIG.paymentSimulation) {
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Validation...</span>';
-            await sleep(1500);
+        // 2. Initier le paiement Moneroo
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Redirection...</span>';
 
-            const simRes = await fetch(`${CONFIG.apiUrl}/payment/simulate?vote_id=${voteId}&statut=reussi`);
-            const simData = await simRes.json();
+        const payRes = await fetch(`${CONFIG.apiUrl}/payment/vote`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': CONFIG.csrfToken
+            },
+            body: JSON.stringify({ vote_id: voteId })
+        });
 
-            if (simData.success) {
-                closeVoteModal();
-                showToast(`Vote valide ! ${nombreVotes} vote(s) pour ${appState.currentCandidat.prenom}`, 'success');
-                setTimeout(() => loadCandidates(), 1000);
-            } else {
-                throw new Error(simData.message || 'Echec simulation');
-            }
+        const payData = await payRes.json();
+
+        if (payData.success && payData.checkout_url) {
+            closeVoteModal();
+            showToast('Redirection vers le paiement...', 'info');
+            setTimeout(() => { window.location.href = payData.checkout_url; }, 800);
         } else {
-            const payRes = await fetch(`${CONFIG.apiUrl}/payment/initier`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': CONFIG.csrfToken
-                },
-                body: JSON.stringify({ vote_id: voteId })
-            });
-
-            const payData = await payRes.json();
-
-            if (payData.success && payData.payment_url) {
-                closeVoteModal();
-                showToast('Redirection vers le paiement...', 'info');
-                setTimeout(() => { window.location.href = payData.payment_url; }, 800);
-            } else {
-                throw new Error(payData.message || 'Erreur paiement');
-            }
+            throw new Error(payData.message || 'Erreur paiement');
         }
     } catch (error) {
         console.error('Erreur paiement:', error);
@@ -504,7 +490,7 @@ function setDonation(amount) {
     });
 }
 
-function processDonation() {
+async function processDonation() {
     const input = document.getElementById('donationAmount');
     const amount = parseInt(input.value);
 
@@ -513,7 +499,36 @@ function processDonation() {
         return;
     }
 
-    showToast('Fonctionnalite de don bientot disponible !', 'info');
+    const btn = document.getElementById('btnDonate');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Redirection...</span>';
+
+    try {
+        const res = await fetch(`${CONFIG.apiUrl}/payment/don`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': CONFIG.csrfToken
+            },
+            body: JSON.stringify({ montant: amount })
+        });
+
+        const data = await res.json();
+
+        if (data.success && data.checkout_url) {
+            showToast('Redirection vers le paiement...', 'info');
+            setTimeout(() => { window.location.href = data.checkout_url; }, 800);
+        } else {
+            throw new Error(data.message || 'Erreur paiement');
+        }
+    } catch (error) {
+        console.error('Erreur don:', error);
+        showToast(error.message || 'Une erreur est survenue', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
 }
 
 // ========================================

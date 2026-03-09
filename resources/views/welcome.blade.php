@@ -9,24 +9,20 @@
         <div class="container sticky-nav-inner">
             <a href="#" class="sticky-logo" onclick="window.scrollTo({top:0,behavior:'smooth'});return false">
                 <div class="sticky-logo-icon"><i class="fas fa-trophy"></i></div>
-                <span>LTP Bopa</span>
+                <div class="logo-text">
+                    <span class="logo-name">LTP Bopa</span>
+                    <span class="logo-sub">Excellence 2025</span>
+                </div>
             </a>
             <div class="sticky-right">
-                <div class="sticky-stat">
-                    <i class="fas fa-users"></i>
-                    <span id="navTotalCandidats">0</span> candidats
-                </div>
-                <div class="sticky-stat">
-                    <i class="fas fa-heart"></i>
-                    <span id="navTotalVotes">0</span> votes
-                </div>
-                <a href="/mes-votes" class="sticky-link">
-                    <i class="fas fa-search"></i>
+                <a href="/mes-votes" class="chip" style="text-decoration: none;">
+                    <i class="fas fa-search" style="font-size: .65rem;"></i>
                     Mes votes
                 </a>
-                <button class="sticky-cta" onclick="scrollToFilieres()">
-                    Voter maintenant
-                </button>
+                <a href="/don" class="chip chip--cta" style="text-decoration: none;">
+                    <i class="fas fa-hand-holding-heart" style="color: var(--gold-500); font-size: .7rem;"></i>
+                    Faire un don
+                </a>
                 <div class="theme-switch" onclick="toggleTheme()" title="Changer de theme" role="button" tabindex="0" aria-label="Changer de theme">
                     <div class="theme-switch-track">
                         <div class="theme-switch-thumb">
