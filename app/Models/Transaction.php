@@ -61,22 +61,21 @@ class Transaction extends Model
     const STATUT_ANNULE = 'annule';
 
     /**
-     * Gateways de paiement
+     * Gateway de paiement
      */
-    const GATEWAY_PAWAPAY = 'pawapay';
-    const GATEWAY_FEEXPAY = 'feexpay';
+    const GATEWAY_MONEROO = 'moneroo';
 
     /**
-     * Mapping statut PawaPay → statut interne
+     * Mapping statut Moneroo → statut interne
      */
-    public static function mapStatutPawapay(string $pawapayStatus): string
+    public static function mapStatutMoneroo(string $monerooStatus): string
     {
-        return match ($pawapayStatus) {
-            'COMPLETED'  => self::STATUT_REUSSI,
-            'FAILED'     => self::STATUT_ECHOUE,
-            'REJECTED'   => self::STATUT_ECHOUE,
-            'CANCELLED'  => self::STATUT_ANNULE,
-            default      => self::STATUT_EN_ATTENTE,
+        return match (strtolower($monerooStatus)) {
+            'success'   => self::STATUT_REUSSI,
+            'failed'    => self::STATUT_ECHOUE,
+            'cancelled' => self::STATUT_ANNULE,
+            'pending', 'initiated' => self::STATUT_EN_ATTENTE,
+            default     => self::STATUT_EN_ATTENTE,
         };
     }
 

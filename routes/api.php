@@ -27,7 +27,7 @@ Route::prefix('votes')->group(function () {
     Route::get('/statistiques/all', [VoteController::class, 'statistiques'])->name('api.votes.statistiques');
 });
 
-// Paiement PawaPay (STK Push)
+// Paiement Moneroo (redirection checkout)
 Route::prefix('payment')->group(function () {
     // Initier un paiement (vote)
     Route::post('/vote', [PaymentController::class, 'initierVote'])->name('api.payment.vote');
@@ -35,13 +35,7 @@ Route::prefix('payment')->group(function () {
     // Initier un paiement (don)
     Route::post('/don', [PaymentController::class, 'initierDon'])->name('api.payment.don');
 
-    // Webhook PawaPay (notification automatique)
-    Route::post('/pawapay/callback', [PaymentController::class, 'webhook'])->name('api.payment.pawapay.callback');
-
-    // Webhook FeexPay (notification automatique)
-    Route::post('/feexpay/callback', [PaymentController::class, 'webhookFeexpay'])->name('api.payment.feexpay.callback');
-
-    // Vérifier le statut d'un dépôt
+    // Vérifier le statut d'un paiement
     Route::get('/verifier', [PaymentController::class, 'verifierDepot'])->name('api.payment.verifier');
 
     // Recherche par téléphone

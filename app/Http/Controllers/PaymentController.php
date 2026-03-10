@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Vote;
 use App\Models\Don;
 use App\Models\Transaction;
-use App\Services\PawapayService;
-use App\Services\FeexpayService;
+use App\Services\MonerooService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -15,37 +14,40 @@ use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
-    private function pawapay(): PawapayService
+    private function moneroo(): MonerooService
     {
-        return app(PawapayService::class);
-    }
-
-    private function feexpay(): FeexpayService
-    {
-        return app(FeexpayService::class);
+        return app(MonerooService::class);
     }
 
     /**
-     * Retourner le service de paiement correspondant à la gateway
+     * Page d'accueil — gère aussi le retour Moneroo avec paymentId
      */
-    private function getService(string $gateway): PawapayService|FeexpayService
+    public function accueil(Request $request)
     {
-        return match ($gateway) {
-            Transaction::GATEWAY_FEEXPAY => $this->feexpay(),
-            default => $this->pawapay(),
-        };
+        $paymentId = $request->query('paymentId');
+
+        if ($paymentId) {
+            try {
+                $this->moneroo()->traiterRetour($paymentId);
+            } catch (\Exception $e) {
+                Log::error('Erreur traitement retour Moneroo (accueil)', [
+                    'payment_id' => $paymentId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return view('welcome');
     }
 
     /**
-     * Initier un paiement pour un vote (STK Push)
+     * Initier un paiement pour un vote (redirection Moneroo)
      */
     public function initierVote(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'vote_id' => 'required|integer|exists:votes,id',
-            'telephone' => 'required|string|min:8|max:20',
-            'operateur' => 'required|string|in:MTN,MOOV',
-            'gateway' => 'sometimes|string|in:pawapay,feexpay',
+            'telephone' => 'nullable|string|min:8|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -72,14 +74,13 @@ class PaymentController extends Controller
                 $vote->save();
             }
 
-            $gateway = $request->input('gateway', Transaction::GATEWAY_PAWAPAY);
-            $service = $this->getService($gateway);
-            $result = $service->initierPaiementVote($vote, $request->telephone, $request->operateur);
+            $result = $this->moneroo()->initierPaiementVote($vote, $request->telephone);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Paiement initié. Confirmez sur votre téléphone.',
-                'deposit_id' => $result['deposit_id'],
+                'message' => 'Redirection vers la page de paiement.',
+                'checkout_url' => $result['checkout_url'],
+                'payment_id' => $result['payment_id'],
                 'vote_id' => $vote->id,
             ]);
 
@@ -98,17 +99,15 @@ class PaymentController extends Controller
     }
 
     /**
-     * Initier un paiement pour un don (STK Push)
+     * Initier un paiement pour un don (redirection Moneroo)
      */
     public function initierDon(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'montant' => 'required|integer|min:' . config('concours.min_don', 100),
-            'telephone' => 'required|string|min:8|max:20',
-            'operateur' => 'required|string|in:MTN,MOOV',
+            'telephone' => 'nullable|string|min:8|max:20',
             'nom_donateur' => 'nullable|string|max:100',
             'message' => 'nullable|string|max:500',
-            'gateway' => 'sometimes|string|in:pawapay,feexpay',
         ]);
 
         if ($validator->fails()) {
@@ -130,14 +129,13 @@ class PaymentController extends Controller
                 ]);
             });
 
-            $gateway = $request->input('gateway', Transaction::GATEWAY_PAWAPAY);
-            $service = $this->getService($gateway);
-            $result = $service->initierPaiementDon($don, $request->telephone, $request->operateur);
+            $result = $this->moneroo()->initierPaiementDon($don, $request->telephone ?? null);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Paiement initié. Confirmez sur votre téléphone.',
-                'deposit_id' => $result['deposit_id'],
+                'message' => 'Redirection vers la page de paiement.',
+                'checkout_url' => $result['checkout_url'],
+                'payment_id' => $result['payment_id'],
                 'don_id' => $don->id,
             ]);
 
@@ -156,80 +154,21 @@ class PaymentController extends Controller
     }
 
     /**
-     * Webhook PawaPay — réception des notifications de paiement
-     */
-    public function webhook(Request $request): JsonResponse
-    {
-        // Vérifier la signature (Content-Digest RFC-9421)
-        if (!$this->pawapay()->verifierSignature($request)) {
-            Log::warning('Webhook PawaPay : signature invalide', [
-                'ip' => $request->ip(),
-            ]);
-
-            return response()->json(['success' => false, 'message' => 'Signature invalide'], 403);
-        }
-
-        try {
-            Log::info('Webhook PawaPay reçu', [
-                'deposit_id' => $request->input('depositId'),
-                'status' => $request->input('status'),
-            ]);
-
-            $this->pawapay()->traiterWebhook($request->all());
-
-            return response()->json(['success' => true]);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur webhook PawaPay', [
-                'error' => $e->getMessage(),
-                'payload' => $request->all(),
-            ]);
-
-            return response()->json(['success' => false], 500);
-        }
-    }
-
-    /**
-     * Webhook FeexPay — réception des notifications de paiement
-     */
-    public function webhookFeexpay(Request $request): JsonResponse
-    {
-        try {
-            Log::info('Webhook FeexPay reçu', [
-                'reference' => $request->input('reference') ?? $request->input('transref'),
-                'status' => $request->input('status'),
-            ]);
-
-            $this->feexpay()->traiterWebhook($request->all());
-
-            return response()->json(['success' => true]);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur webhook FeexPay', [
-                'error' => $e->getMessage(),
-                'payload' => $request->all(),
-            ]);
-
-            return response()->json(['success' => false], 500);
-        }
-    }
-
-    /**
-     * Vérifier le statut d'un dépôt PawaPay
+     * Vérifier le statut d'un paiement Moneroo
      */
     public function verifierDepot(Request $request): JsonResponse
     {
-        $depositId = $request->query('deposit_id');
+        $paymentId = $request->query('deposit_id') ?? $request->query('payment_id');
 
-        if (!$depositId) {
+        if (!$paymentId) {
             return response()->json([
                 'success' => false,
-                'message' => 'deposit_id requis',
+                'message' => 'payment_id requis',
             ], 400);
         }
 
         try {
-            $transaction = Transaction::where('deposit_id', $depositId)->first();
+            $transaction = Transaction::where('deposit_id', $paymentId)->first();
 
             if (!$transaction) {
                 return response()->json([
@@ -240,8 +179,7 @@ class PaymentController extends Controller
 
             // Si encore en attente, tenter une vérification via l'API
             if ($transaction->statut === Transaction::STATUT_EN_ATTENTE) {
-                $service = $this->getService($transaction->gateway ?? Transaction::GATEWAY_PAWAPAY);
-                $service->verifierPaiement($depositId);
+                $this->moneroo()->verifierPaiement($paymentId);
                 $transaction->refresh();
             }
 
@@ -254,9 +192,9 @@ class PaymentController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Erreur vérification dépôt PawaPay', [
+            Log::error('Erreur vérification paiement Moneroo', [
                 'error' => $e->getMessage(),
-                'deposit_id' => $depositId,
+                'payment_id' => $paymentId,
             ]);
 
             return response()->json([
@@ -265,6 +203,36 @@ class PaymentController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    /**
+     * Retour après paiement Moneroo — vérifie le statut et redirige vers l'accueil
+     */
+    public function retourPaiement(Request $request)
+    {
+        $paymentId = $request->query('paymentId');
+
+        if ($paymentId) {
+            try {
+                $this->moneroo()->traiterRetour($paymentId);
+            } catch (\Exception $e) {
+                Log::error('Erreur traitement retour Moneroo', [
+                    'payment_id' => $paymentId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Rediriger vers l'accueil en conservant les params pour le JS (modal succès)
+        $query = [];
+        if ($paymentId) {
+            $query['paymentId'] = $paymentId;
+        }
+        if ($request->query('paymentStatus')) {
+            $query['paymentStatus'] = $request->query('paymentStatus');
+        }
+
+        return redirect('/?' . http_build_query($query));
     }
 
     /**
@@ -284,7 +252,7 @@ class PaymentController extends Controller
         }
 
         try {
-            $resultats = $this->pawapay()->rechercherParTelephone($request->telephone);
+            $resultats = $this->moneroo()->rechercherParTelephone($request->telephone);
 
             return response()->json([
                 'success' => true,
@@ -331,8 +299,6 @@ class PaymentController extends Controller
 
             DB::beginTransaction();
 
-            $gateway = $request->query('gateway', Transaction::GATEWAY_PAWAPAY);
-
             if ($voteId) {
                 $vote = Vote::findOrFail($voteId);
                 if (!$vote->estEnAttente()) {
@@ -348,8 +314,7 @@ class PaymentController extends Controller
                     'statut' => $statut === 'reussi' ? Transaction::STATUT_REUSSI : Transaction::STATUT_ECHOUE,
                     'type' => Transaction::TYPE_VOTE,
                     'telephone' => $vote->telephone,
-                    'operateur' => 'MTN',
-                    'gateway' => $gateway,
+                    'gateway' => Transaction::GATEWAY_MONEROO,
                     'response_data' => ['simulation' => true, 'date' => now()->toDateTimeString()],
                     'processed_at' => now(),
                 ]);
@@ -367,8 +332,7 @@ class PaymentController extends Controller
                     'statut' => $statut === 'reussi' ? Transaction::STATUT_REUSSI : Transaction::STATUT_ECHOUE,
                     'type' => Transaction::TYPE_DON,
                     'telephone' => $don->telephone,
-                    'operateur' => 'MTN',
-                    'gateway' => $gateway,
+                    'gateway' => Transaction::GATEWAY_MONEROO,
                     'response_data' => ['simulation' => true, 'date' => now()->toDateTimeString()],
                     'processed_at' => now(),
                 ]);

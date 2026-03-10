@@ -95,27 +95,6 @@
                 </div>
             </div>
 
-            <div class="hero-stats-bar">
-                <div class="hero-stat">
-                    <span class="hero-stat-value" id="statCandidats">0</span>
-                    <span class="hero-stat-label">Candidats</span>
-                </div>
-                <div class="hero-stat-divider"></div>
-                <div class="hero-stat">
-                    <span class="hero-stat-value" id="statFilieres">5</span>
-                    <span class="hero-stat-label">Filieres</span>
-                </div>
-                <div class="hero-stat-divider"></div>
-                <div class="hero-stat">
-                    <span class="hero-stat-value" id="statVotes">0</span>
-                    <span class="hero-stat-label">Votes</span>
-                </div>
-                <div class="hero-stat-divider"></div>
-                <div class="hero-stat">
-                    <span class="hero-stat-value">100<small>F</small></span>
-                    <span class="hero-stat-label">Par vote</span>
-                </div>
-            </div>
         </div>
         <div class="hero-scroll-indicator" onclick="scrollToFilieres()">
             <div class="scroll-mouse">
@@ -140,7 +119,6 @@
                         ['code' => 'PM',  'name' => 'Producteur Multimedia',       'icon' => 'fa-film',          'desc' => 'Production audiovisuelle, montage et creation de contenu'],
                         ['code' => 'MMV', 'name' => 'Mode & Vetement',             'icon' => 'fa-scissors',      'desc' => 'Stylisme, couture et design de mode'],
                         ['code' => 'BTP', 'name' => 'Batiment & Travaux Publics',  'icon' => 'fa-helmet-safety', 'desc' => 'Construction, genie civil et amenagement'],
-                        ['code' => 'EA',  'name' => 'Electronique Appliquee',       'icon' => 'fa-microchip',    'desc' => 'Circuits electroniques et systemes embarques'],
                     ];
                 @endphp
 
@@ -263,42 +241,6 @@
                             <button class="quick-vote-btn" onclick="setVotes(25)">25</button>
                             <button class="quick-vote-btn" onclick="setVotes(50)">50</button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Section 2 : Paiement Mobile Money -->
-                <div class="modal-section">
-                    <label class="input-label">
-                        <i class="fas fa-mobile-alt modal-section-icon"></i>
-                        Paiement Mobile Money
-                    </label>
-
-                    <div class="payment-selectors">
-                        <div class="gateway-group">
-                            <button class="gateway-btn active" onclick="setGateway('pawapay')" data-gw="pawapay">
-                                <i class="fas fa-mobile-screen-button"></i>
-                                PawaPay
-                            </button>
-                            <button class="gateway-btn" onclick="setGateway('feexpay')" data-gw="feexpay">
-                                <i class="fas fa-credit-card"></i>
-                                FeexPay
-                            </button>
-                        </div>
-                        <div class="operateur-group">
-                            <button class="operateur-btn active" onclick="setOperateur('MTN')" data-op="MTN">
-                                <span class="operateur-dot operateur-dot--mtn"></span>
-                                MTN
-                            </button>
-                            <button class="operateur-btn" onclick="setOperateur('MOOV')" data-op="MOOV">
-                                <span class="operateur-dot operateur-dot--moov"></span>
-                                Moov
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="phone-input-group">
-                        <span class="phone-prefix">+229</span>
-                        <input type="tel" class="phone-input" id="voteTelephone" placeholder="96 00 00 00" maxlength="12" autocomplete="tel">
                     </div>
                 </div>
 

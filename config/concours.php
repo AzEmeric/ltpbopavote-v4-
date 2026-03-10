@@ -45,41 +45,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | PawaPay — Passerelle de paiement (STK Push)
+    | Moneroo — Passerelle de paiement (redirection checkout)
     |--------------------------------------------------------------------------
     |
-    | Doc : https://docs.pawapay.io
-    | API Base URL : Production https://api.pawapay.io/ | Sandbox https://api.sandbox.pawapay.io/
-    | Auth : Bearer token (API Token)
-    | Bénin : MTN_MOMO_BEN, MOOV_BEN — devise XOF (pas de décimales)
-    |
-    | Webhook : POST callback avec headers Content-Digest, Signature, Signature-Input (RFC-9421)
-    | Statuts : COMPLETED, FAILED, REJECTED, CANCELLED
+    | Doc : https://docs.moneroo.io
+    | SDK PHP : moneroo/moneroo-php
+    | Flow : redirection vers page checkout Moneroo, retour via return_url
     |
     */
 
-    'pawapay' => [
-        'api_token'    => env('PAWAPAY_API_TOKEN'),
-        'base_url'     => env('PAWAPAY_BASE_URL', 'https://api.sandbox.pawapay.io'),
-        'callback_url' => env('PAWAPAY_CALLBACK_URL'),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | FeexPay — Passerelle de paiement alternative
-    |--------------------------------------------------------------------------
-    |
-    | Doc : https://feexpay.me
-    | API : https://api.feexpay.me
-    | Paiement local Mobile Money (MTN, MOOV) via SDK PHP
-    |
-    */
-
-    'feexpay' => [
-        'shop_id'      => env('FEEXPAY_SHOP_ID'),
-        'api_token'    => env('FEEXPAY_API_TOKEN'),
-        'callback_url' => env('FEEXPAY_CALLBACK_URL'),
-        'mode'         => env('FEEXPAY_MODE', 'SANDBOX'),
+    'moneroo' => [
+        'secret_key' => env('MONEROO_SECRET_KEY'),
     ],
 
     // Activer la simulation de paiement (développement uniquement)

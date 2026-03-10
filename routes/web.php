@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -8,10 +9,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Page d'accueil
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// Page d'accueil (gère aussi le retour Moneroo)
+Route::get('/', [PaymentController::class, 'accueil'])->name('home');
 
 // Page de don
 Route::get('/don', function () {
@@ -22,3 +21,6 @@ Route::get('/don', function () {
 Route::get('/mes-votes', function () {
     return view('mes-votes');
 })->name('mes-votes');
+
+// Retour après paiement Moneroo (vérifie le statut puis redirige vers l'accueil)
+Route::get('/paiement/retour', [PaymentController::class, 'retourPaiement'])->name('paiement.retour');
