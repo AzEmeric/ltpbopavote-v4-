@@ -185,9 +185,10 @@ function renderCandidates() {
         const rank = i + 1;
         const rankClass = rank <= 3 ? `rank-${rank}` : '';
         const photoUrl = c.photo_url_complete || c.photo_url || `${CONFIG.baseUrl}/uploads/candidats/default.jpg`;
+        const totalVotes = c.total_votes || 0;
 
         return `
-        <div class="candidate-card" style="animation-delay: ${i * 0.08}s">
+        <div class="candidate-card" style="animation-delay: ${i * 0.06}s">
             <div class="candidate-img">
                 <img src="${photoUrl}"
                      alt="${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}"
@@ -197,7 +198,7 @@ function renderCandidates() {
                 ${rankClass ? `<span class="card-rank ${rankClass}">#${rank}</span>` : ''}
                 <div class="card-votes">
                     <i class="fas fa-heart"></i>
-                    <span>${formatNumber(c.total_votes || 0)}</span>
+                    <span>${formatNumber(totalVotes)}</span>
                 </div>
             </div>
             <div class="candidate-body">
@@ -206,11 +207,11 @@ function renderCandidates() {
                     <i class="fas fa-graduation-cap"></i>
                     ${escapeHtml(c.filiere)}
                 </span>
-                <p class="candidate-desc">${escapeHtml(c.description || '')}</p>
+                ${c.description ? `<p class="candidate-desc">${escapeHtml(c.description)}</p>` : ''}
                 <div class="vote-progress">
                     <div class="progress-header">
                         <span>Popularite</span>
-                        <span class="count">${formatNumber(c.total_votes || 0)} votes</span>
+                        <span class="count">${formatNumber(totalVotes)} vote${totalVotes !== 1 ? 's' : ''}</span>
                     </div>
                     <div class="progress-track">
                         <div class="progress-fill" style="width: ${progress}%"></div>
@@ -254,6 +255,13 @@ function openVoteModal(candidatId) {
     setGateway('pawapay');
     updatePaymentSummary();
     highlightQuickVote(1);
+
+    // Reinitialiser le bouton payer
+    const btn = document.getElementById('btnPay');
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-paper-plane"></i> <span>Confirmer</span> <span class="btn-pay-amount" id="btnPayAmount">${CONFIG.votePrice} FCFA</span>`;
+    }
 
     const overlay = document.getElementById('voteModalOverlay');
     overlay.classList.add('active');
@@ -480,26 +488,22 @@ function showWaitScreen(depositId, itemId) {
 
     waitScreen.style.display = 'block';
     waitScreen.innerHTML = `
-        <div style="text-align: center; padding: 2rem 1.5rem;">
-            <div style="font-size: 3.5rem; margin-bottom: 1.5rem;">
-                <i class="fas fa-mobile-alt fa-bounce" style="color: var(--gold-500, #D4AF37);"></i>
+        <div class="wait-screen">
+            <div class="wait-screen-icon">
+                <i class="fas fa-mobile-alt fa-bounce"></i>
             </div>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.75rem;">
-                Confirmez sur votre telephone
-            </h3>
-            <p style="color: var(--text-muted, #9ca3af); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5;">
+            <h3 class="wait-screen-title">Confirmez sur votre telephone</h3>
+            <p class="wait-screen-text">
                 Un prompt USSD a ete envoye sur votre telephone.<br>
                 Composez votre code PIN pour confirmer le paiement.
             </p>
-            <div id="waitStatusIcon" style="margin-bottom: 1rem;">
-                <i class="fas fa-circle-notch fa-spin" style="font-size: 1.5rem; color: var(--gold-500, #D4AF37);"></i>
+            <div id="waitStatusIcon" class="wait-screen-spinner">
+                <i class="fas fa-circle-notch fa-spin"></i>
             </div>
-            <p id="waitStatusText" style="color: var(--text-muted, #9ca3af); font-size: 0.85rem;">
+            <p id="waitStatusText" class="wait-screen-status">
                 En attente de confirmation...
             </p>
-            <button onclick="closeVoteModal()" style="margin-top: 1.5rem; background: none; border: 1px solid var(--border-color, #374151); color: var(--text-muted, #9ca3af); padding: 0.5rem 1.5rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem;">
-                Fermer
-            </button>
+            <button onclick="closeVoteModal()" class="wait-screen-close">Fermer</button>
         </div>
     `;
 
@@ -540,7 +544,7 @@ async function pollPaymentStatus(depositId, itemId) {
             const statusText = document.getElementById('waitStatusText');
             const statusIcon = document.getElementById('waitStatusIcon');
             if (statusText) statusText.textContent = 'Delai d\'attente depasse. Verifiez dans "Mes votes".';
-            if (statusIcon) statusIcon.innerHTML = '<i class="fas fa-clock" style="font-size: 1.5rem; color: var(--text-muted, #9ca3af);"></i>';
+            if (statusIcon) statusIcon.innerHTML = '<i class="fas fa-clock"></i>';
         }
     };
 
@@ -553,17 +557,15 @@ function showPaymentResult(success) {
 
     if (success) {
         waitScreen.innerHTML = `
-            <div style="text-align: center; padding: 2rem 1.5rem;">
-                <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16,185,129,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
-                    <i class="fas fa-check" style="font-size: 2rem; color: #10B981;"></i>
+            <div class="wait-screen">
+                <div class="result-icon result-icon--success">
+                    <i class="fas fa-check"></i>
                 </div>
-                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.5rem;">
-                    Paiement reussi !
-                </h3>
-                <p style="color: var(--text-muted, #9ca3af); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                <h3 class="result-title">Paiement reussi !</h3>
+                <p class="result-text">
                     Votre vote a ete comptabilise avec succes. Merci pour votre soutien !
                 </p>
-                <button onclick="closeVoteModal()" style="background: var(--gold-500, #D4AF37); color: #000; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                <button onclick="closeVoteModal()" class="result-btn">
                     <i class="fas fa-check"></i> Fermer
                 </button>
             </div>
@@ -571,17 +573,15 @@ function showPaymentResult(success) {
         showToast('Vote comptabilise avec succes !', 'success');
     } else {
         waitScreen.innerHTML = `
-            <div style="text-align: center; padding: 2rem 1.5rem;">
-                <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(239,68,68,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
-                    <i class="fas fa-xmark" style="font-size: 2rem; color: #EF4444;"></i>
+            <div class="wait-screen">
+                <div class="result-icon result-icon--error">
+                    <i class="fas fa-xmark"></i>
                 </div>
-                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.5rem;">
-                    Paiement echoue
-                </h3>
-                <p style="color: var(--text-muted, #9ca3af); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                <h3 class="result-title">Paiement echoue</h3>
+                <p class="result-text">
                     Le paiement n'a pas abouti. Vous pouvez reessayer.
                 </p>
-                <button onclick="closeVoteModal()" style="background: var(--gold-500, #D4AF37); color: #000; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                <button onclick="closeVoteModal()" class="result-btn">
                     <i class="fas fa-arrow-left"></i> Fermer
                 </button>
             </div>
@@ -604,9 +604,15 @@ function updateStats() {
     animateNumber('statCandidats', totalCandidats);
     animateNumber('statVotes', totalVotes);
 
-    // Nav stats
+    // Nav stats (elements may not exist on all pages)
     setTextContent('navTotalCandidats', formatNumber(totalCandidats));
     setTextContent('navTotalVotes', formatNumber(totalVotes));
+
+    // Sticky nav stats (update if present)
+    document.querySelectorAll('.sticky-stat span').forEach((el, i) => {
+        if (i === 0) el.textContent = formatNumber(totalCandidats);
+        if (i === 1) el.textContent = formatNumber(totalVotes);
+    });
 }
 
 function animateNumber(id, target) {
@@ -796,24 +802,6 @@ async function pollDonationStatus(depositId, btn, originalHTML) {
 }
 
 // ========================================
-// THEME TOGGLE
-// ========================================
-
-function toggleTheme() {
-    const html = document.documentElement;
-    const current = html.getAttribute('data-theme') || 'dark';
-    const next = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-
-    // Mettre a jour le meta theme-color
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) {
-        meta.setAttribute('content', next === 'dark' ? '#070E18' : '#F8FAFC');
-    }
-}
-
-// ========================================
 // GLOBAL EXPORTS
 // ========================================
 
@@ -834,7 +822,6 @@ window.scrollToFilieres = scrollToFilieres;
 window.scrollToDonation = scrollToDonation;
 window.setDonation = setDonation;
 window.processDonation = processDonation;
-window.toggleTheme = toggleTheme;
 window.rechercherVotes = rechercherVotes;
 
 // ========================================

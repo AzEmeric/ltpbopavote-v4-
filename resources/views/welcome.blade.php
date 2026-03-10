@@ -15,22 +15,14 @@
                 </div>
             </a>
             <div class="sticky-right">
-                <a href="/mes-votes" class="chip" style="text-decoration: none;">
-                    <i class="fas fa-search" style="font-size: .65rem;"></i>
-                    Mes votes
+                <a href="/mes-votes" class="chip">
+                    <i class="fas fa-search"></i>
+                    <span>Mes votes</span>
                 </a>
-                <a href="/don" class="chip chip--cta" style="text-decoration: none;">
-                    <i class="fas fa-hand-holding-heart" style="color: var(--gold-500); font-size: .7rem;"></i>
-                    Faire un don
+                <a href="/don" class="chip chip--cta">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <span>Faire un don</span>
                 </a>
-                <div class="theme-switch" onclick="toggleTheme()" title="Changer de theme" role="button" tabindex="0" aria-label="Changer de theme">
-                    <div class="theme-switch-track">
-                        <div class="theme-switch-thumb">
-                            <i class="fas fa-moon"></i>
-                            <i class="fas fa-sun"></i>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </nav>
@@ -53,23 +45,15 @@
                         <span class="logo-sub">Excellence 2025</span>
                     </div>
                 </a>
-                <div style="display: flex; align-items: center; gap: .75rem;">
-                    <a href="/mes-votes" class="chip" style="text-decoration: none;">
-                        <i class="fas fa-search" style="font-size: .65rem;"></i>
-                        Mes votes
+                <div class="hero-top-right">
+                    <a href="/mes-votes" class="chip">
+                        <i class="fas fa-search"></i>
+                        <span>Mes votes</span>
                     </a>
-                    <a href="/don" class="chip chip--cta" style="text-decoration: none;">
-                        <i class="fas fa-hand-holding-heart" style="color: var(--gold-500); font-size: .7rem;"></i>
-                        Faire un don
+                    <a href="/don" class="chip chip--cta">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>Faire un don</span>
                     </a>
-                    <div class="theme-switch" onclick="toggleTheme()" title="Changer de theme" role="button" tabindex="0" aria-label="Changer de theme">
-                        <div class="theme-switch-track">
-                            <div class="theme-switch-thumb">
-                                <i class="fas fa-moon"></i>
-                                <i class="fas fa-sun"></i>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -86,13 +70,21 @@
                 <p class="hero-subtitle">
                     Votez et faites des dons pour soutenir vos candidats favoris<br class="hide-mobile"> aux Awards LTPBOPA. 100 FCFA = 1 vote. Chaque geste compte.
                 </p>
+                <div class="hero-mobile-nav">
+                    <a href="/mes-votes" class="hero-mobile-link">
+                        <i class="fas fa-search"></i> Mes votes
+                    </a>
+                    <a href="/don" class="hero-mobile-link hero-mobile-link--cta">
+                        <i class="fas fa-hand-holding-heart"></i> Faire un don
+                    </a>
+                </div>
                 <div class="hero-actions">
                     <button class="btn-hero" onclick="scrollToFilieres()">
                         <i class="fas fa-heart"></i>
                         <span>Soutenir un candidat</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
-                    <a href="/don" class="btn-hero-outline" style="text-decoration: none;">
+                    <a href="/don" class="btn-hero-outline">
                         <i class="fas fa-hand-holding-heart"></i>
                         <span>Faire un don</span>
                     </a>
@@ -144,11 +136,11 @@
             <div class="filieres-grid">
                 @php
                     $filieres = [
-                        ['code' => 'DWM', 'name' => 'Developpement Web & Mobile', 'icon' => 'fa-code'],
-                        ['code' => 'PM',  'name' => 'Producteur Multimedia',       'icon' => 'fa-film'],
-                        ['code' => 'MMV', 'name' => 'Mode & Vetement',             'icon' => 'fa-scissors'],
-                        ['code' => 'BTP', 'name' => 'Batiment & Travaux Publics',  'icon' => 'fa-helmet-safety'],
-                        ['code' => 'EA',  'name' => 'Electronique Appliquee',       'icon' => 'fa-microchip'],
+                        ['code' => 'DWM', 'name' => 'Developpement Web & Mobile', 'icon' => 'fa-code',          'desc' => 'Sites web, applications mobiles et solutions digitales'],
+                        ['code' => 'PM',  'name' => 'Producteur Multimedia',       'icon' => 'fa-film',          'desc' => 'Production audiovisuelle, montage et creation de contenu'],
+                        ['code' => 'MMV', 'name' => 'Mode & Vetement',             'icon' => 'fa-scissors',      'desc' => 'Stylisme, couture et design de mode'],
+                        ['code' => 'BTP', 'name' => 'Batiment & Travaux Publics',  'icon' => 'fa-helmet-safety', 'desc' => 'Construction, genie civil et amenagement'],
+                        ['code' => 'EA',  'name' => 'Electronique Appliquee',       'icon' => 'fa-microchip',    'desc' => 'Circuits electroniques et systemes embarques'],
                     ];
                 @endphp
 
@@ -161,6 +153,7 @@
                     <div class="filiere-info">
                         <h3 class="filiere-code">{{ $f['code'] }}</h3>
                         <p class="filiere-name">{{ $f['name'] }}</p>
+                        <p class="filiere-desc">{{ $f['desc'] }}</p>
                     </div>
                     <div class="filiere-bottom">
                         <span class="filiere-count"><span id="count-{{ $f['code'] }}">0</span> candidats</span>
@@ -253,22 +246,23 @@
                         <i class="fas fa-heart modal-section-icon"></i>
                         Nombre de votes
                     </label>
-                    <div class="vote-stepper">
-                        <button class="stepper-btn" onclick="decrementVotes()" aria-label="Moins">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <input type="number" class="stepper-input" id="nombreVotes" value="1" min="1" max="100">
-                        <button class="stepper-btn" onclick="incrementVotes()" aria-label="Plus">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-
-                    <div class="quick-votes">
-                        <button class="quick-vote-btn" onclick="setVotes(1)">1</button>
-                        <button class="quick-vote-btn" onclick="setVotes(5)">5</button>
-                        <button class="quick-vote-btn" onclick="setVotes(10)">10</button>
-                        <button class="quick-vote-btn" onclick="setVotes(25)">25</button>
-                        <button class="quick-vote-btn" onclick="setVotes(50)">50</button>
+                    <div class="votes-row">
+                        <div class="vote-stepper">
+                            <button class="stepper-btn" onclick="decrementVotes()" aria-label="Moins">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="stepper-input" id="nombreVotes" value="1" min="1" max="100">
+                            <button class="stepper-btn" onclick="incrementVotes()" aria-label="Plus">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="quick-votes">
+                            <button class="quick-vote-btn" onclick="setVotes(1)">1</button>
+                            <button class="quick-vote-btn" onclick="setVotes(5)">5</button>
+                            <button class="quick-vote-btn" onclick="setVotes(10)">10</button>
+                            <button class="quick-vote-btn" onclick="setVotes(25)">25</button>
+                            <button class="quick-vote-btn" onclick="setVotes(50)">50</button>
+                        </div>
                     </div>
                 </div>
 
@@ -279,54 +273,42 @@
                         Paiement Mobile Money
                     </label>
 
-                    <!-- Choix de la passerelle -->
-                    <div class="gateway-group" style="margin-bottom: 1rem;">
-                        <button class="gateway-btn active" onclick="setGateway('pawapay')" data-gw="pawapay">
-                            <i class="fas fa-mobile-screen-button"></i>
-                            PawaPay
-                        </button>
-                        <button class="gateway-btn" onclick="setGateway('feexpay')" data-gw="feexpay">
-                            <i class="fas fa-credit-card"></i>
-                            FeexPay
-                        </button>
+                    <div class="payment-selectors">
+                        <div class="gateway-group">
+                            <button class="gateway-btn active" onclick="setGateway('pawapay')" data-gw="pawapay">
+                                <i class="fas fa-mobile-screen-button"></i>
+                                PawaPay
+                            </button>
+                            <button class="gateway-btn" onclick="setGateway('feexpay')" data-gw="feexpay">
+                                <i class="fas fa-credit-card"></i>
+                                FeexPay
+                            </button>
+                        </div>
+                        <div class="operateur-group">
+                            <button class="operateur-btn active" onclick="setOperateur('MTN')" data-op="MTN">
+                                <span class="operateur-dot operateur-dot--mtn"></span>
+                                MTN
+                            </button>
+                            <button class="operateur-btn" onclick="setOperateur('MOOV')" data-op="MOOV">
+                                <span class="operateur-dot operateur-dot--moov"></span>
+                                Moov
+                            </button>
+                        </div>
                     </div>
 
                     <div class="phone-input-group">
                         <span class="phone-prefix">+229</span>
                         <input type="tel" class="phone-input" id="voteTelephone" placeholder="96 00 00 00" maxlength="12" autocomplete="tel">
                     </div>
-
-                    <div class="operateur-group">
-                        <button class="operateur-btn active" onclick="setOperateur('MTN')" data-op="MTN">
-                            <span class="operateur-dot operateur-dot--mtn"></span>
-                            MTN MoMo
-                        </button>
-                        <button class="operateur-btn" onclick="setOperateur('MOOV')" data-op="MOOV">
-                            <span class="operateur-dot operateur-dot--moov"></span>
-                            Moov Money
-                        </button>
-                    </div>
                 </div>
 
-                <!-- Section 3 : Resume -->
-                <div class="price-breakdown">
-                    <div class="price-row">
-                        <span>Prix unitaire</span>
-                        <span>{{ config('concours.vote_price') }} FCFA</span>
+                <!-- Resume compact -->
+                <div class="price-summary">
+                    <div class="price-summary-left">
+                        <i class="fas fa-shield-alt"></i>
+                        <span><strong id="summaryVotes">1</strong> vote &middot; Paiement securise</span>
                     </div>
-                    <div class="price-row">
-                        <span>Quantite</span>
-                        <span>&times; <strong id="summaryVotes">1</strong></span>
-                    </div>
-                    <div class="price-row price-total">
-                        <span>Total a payer</span>
-                        <span id="totalAmount">{{ config('concours.vote_price') }} FCFA</span>
-                    </div>
-                </div>
-
-                <div class="secure-badge">
-                    <i class="fas fa-shield-alt"></i>
-                    Paiement securise — vous recevrez un prompt USSD sur votre telephone
+                    <span class="price-summary-total" id="totalAmount">{{ config('concours.vote_price') }} FCFA</span>
                 </div>
             </div>
 

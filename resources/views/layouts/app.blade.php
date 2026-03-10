@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Concours de l'Excellence 2025 - Lycee Technique et Professionnel de Bopa. Votez pour votre candidat favori.">
-    <meta name="theme-color" content="#070E18">
+    <meta name="theme-color" content="#FAFAF8">
 
     <title>@yield('title', 'Concours de l\'Excellence 2025 — LTP Bopa')</title>
 
@@ -15,12 +15,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ time() }}">
 
-    <script>
-        (function() {
-            var t = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
 
     @stack('styles')
 </head>
