@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Faire confiance à tous les proxies (Railway, Cloudflare, etc.)
+        $middleware->trustProxies(at: '*');
+
         // Exclure le webhook PawaPay de la vérification CSRF
         $middleware->validateCsrfTokens(except: [
             'api/payment/pawapay/callback',
