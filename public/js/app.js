@@ -10,6 +10,10 @@ let appState = {
     nombreVotes: 1,
     isLoading: false,
     currentFiliere: null,
+    operateur: 'MTN',
+    donOperateur: 'MTN',
+    gateway: 'pawapay',
+    donGateway: 'pawapay',
     candidatsParFiliere: { DWM: [], PM: [], MMV: [], BTP: [], EA: [] }
 };
 
@@ -67,7 +71,7 @@ function initRevealObserver() {
 // FILIERES
 // ========================================
 
-function showFiliere(filiere) {
+async function showFiliere(filiere) {
     appState.currentFiliere = filiere;
 
     document.querySelector('.filieres-section').style.display = 'none';
@@ -92,6 +96,11 @@ function showFiliere(filiere) {
     loadingEl.style.display = 'block';
     gridEl.style.display = 'none';
     document.getElementById('noCandidates').style.display = 'none';
+
+    // Si les candidats ne sont pas encore charges, attendre le chargement
+    if (appState.candidats.length === 0) {
+        await loadCandidates();
+    }
 
     setTimeout(() => {
         loadingEl.style.display = 'none';
@@ -229,6 +238,8 @@ function openVoteModal(candidatId) {
 
     appState.currentCandidat = candidat;
     appState.nombreVotes = 1;
+    appState.operateur = 'MTN';
+    appState.gateway = 'pawapay';
 
     document.getElementById('modalCandidatNom').textContent = `${candidat.prenom} ${candidat.nom}`;
     document.getElementById('modalCandidatFiliere').textContent = candidat.filiere;
@@ -236,6 +247,11 @@ function openVoteModal(candidatId) {
     document.getElementById('modalCandidatPhoto').alt = `${candidat.prenom} ${candidat.nom}`;
     document.getElementById('nombreVotes').value = 1;
 
+    const telInput = document.getElementById('voteTelephone');
+    if (telInput) telInput.value = '';
+
+    setOperateur('MTN');
+    setGateway('pawapay');
     updatePaymentSummary();
     highlightQuickVote(1);
 
@@ -249,6 +265,14 @@ function closeVoteModal() {
     overlay.classList.remove('active');
     document.body.style.overflow = '';
     appState.currentCandidat = null;
+
+    // Masquer l'écran d'attente si visible
+    const waitScreen = document.getElementById('paymentWaitScreen');
+    if (waitScreen) waitScreen.style.display = 'none';
+    const modalBody = document.querySelector('#voteModal .modal-body');
+    if (modalBody) modalBody.style.display = '';
+    const modalFoot = document.querySelector('#voteModal .modal-foot');
+    if (modalFoot) modalFoot.style.display = '';
 }
 
 function handleOverlayClick(e) {
@@ -282,6 +306,34 @@ function highlightQuickVote(n) {
     });
 }
 
+function setOperateur(op) {
+    appState.operateur = op;
+    document.querySelectorAll('.operateur-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.op === op);
+    });
+}
+
+function setDonOperateur(op) {
+    appState.donOperateur = op;
+    document.querySelectorAll('.don-operateur-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.op === op);
+    });
+}
+
+function setGateway(gw) {
+    appState.gateway = gw;
+    document.querySelectorAll('.gateway-btn:not(.don-gateway-btn)').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.gw === gw);
+    });
+}
+
+function setDonGateway(gw) {
+    appState.donGateway = gw;
+    document.querySelectorAll('.don-gateway-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.gw === gw);
+    });
+}
+
 function updatePaymentSummary() {
     const n = parseInt(document.getElementById('nombreVotes').value) || 1;
     const total = n * CONFIG.votePrice;
@@ -312,12 +364,19 @@ function initEventListeners() {
 }
 
 // ========================================
-// PAIEMENT
+// PAIEMENT (STK Push PawaPay)
 // ========================================
 
 async function processPayment() {
     if (!appState.currentCandidat) {
         showToast('Aucun candidat selectionne', 'error');
+        return;
+    }
+
+    const telephone = document.getElementById('voteTelephone')?.value?.replace(/\s/g, '');
+    if (!telephone || telephone.length < 8) {
+        showToast('Veuillez entrer un numero de telephone valide', 'error');
+        document.getElementById('voteTelephone')?.focus();
         return;
     }
 
@@ -341,7 +400,8 @@ async function processPayment() {
             body: JSON.stringify({
                 candidat_id: appState.currentCandidat.id,
                 nombre_votes: nombreVotes,
-                montant_total: montantTotal
+                montant_total: montantTotal,
+                telephone: telephone
             })
         });
 
@@ -350,8 +410,8 @@ async function processPayment() {
 
         const voteId = voteData.vote_id;
 
-        // 2. Initier le paiement Moneroo
-        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Redirection...</span>';
+        // 2. Initier le paiement PawaPay (STK Push)
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Envoi au telephone...</span>';
 
         const payRes = await fetch(`${CONFIG.apiUrl}/payment/vote`, {
             method: 'POST',
@@ -360,15 +420,31 @@ async function processPayment() {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': CONFIG.csrfToken
             },
-            body: JSON.stringify({ vote_id: voteId })
+            body: JSON.stringify({
+                vote_id: voteId,
+                telephone: telephone,
+                operateur: appState.operateur,
+                gateway: appState.gateway
+            })
         });
 
         const payData = await payRes.json();
 
-        if (payData.success && payData.checkout_url) {
-            closeVoteModal();
-            showToast('Redirection vers le paiement...', 'info');
-            setTimeout(() => { window.location.href = payData.checkout_url; }, 800);
+        if (payData.success && payData.deposit_id) {
+            // Sauvegarder le vote dans localStorage
+            const mesVotes = JSON.parse(localStorage.getItem('mes_votes') || '[]');
+            mesVotes.push({
+                vote_id: voteId,
+                candidat: appState.currentCandidat.prenom + ' ' + appState.currentCandidat.nom,
+                candidat_filiere: appState.currentCandidat.filiere,
+                nombre_votes: nombreVotes,
+                montant: montantTotal,
+                date: new Date().toLocaleString('fr-FR')
+            });
+            localStorage.setItem('mes_votes', JSON.stringify(mesVotes));
+
+            // Afficher l'ecran d'attente STK Push
+            showWaitScreen(payData.deposit_id, voteId);
         } else {
             throw new Error(payData.message || 'Erreur paiement');
         }
@@ -377,6 +453,140 @@ async function processPayment() {
         showToast(error.message || 'Une erreur est survenue', 'error');
         btn.disabled = false;
         btn.innerHTML = originalHTML;
+    }
+}
+
+/**
+ * Afficher l'ecran d'attente "Confirmez sur votre telephone"
+ * + polling du statut toutes les 3s pendant 2 min
+ */
+function showWaitScreen(depositId, itemId) {
+    const modal = document.getElementById('voteModal');
+    if (!modal) return;
+
+    const modalBody = modal.querySelector('.modal-body');
+    const modalFoot = modal.querySelector('.modal-foot');
+
+    if (modalBody) modalBody.style.display = 'none';
+    if (modalFoot) modalFoot.style.display = 'none';
+
+    // Creer l'ecran d'attente
+    let waitScreen = document.getElementById('paymentWaitScreen');
+    if (!waitScreen) {
+        waitScreen = document.createElement('div');
+        waitScreen.id = 'paymentWaitScreen';
+        modal.appendChild(waitScreen);
+    }
+
+    waitScreen.style.display = 'block';
+    waitScreen.innerHTML = `
+        <div style="text-align: center; padding: 2rem 1.5rem;">
+            <div style="font-size: 3.5rem; margin-bottom: 1.5rem;">
+                <i class="fas fa-mobile-alt fa-bounce" style="color: var(--gold-500, #D4AF37);"></i>
+            </div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.75rem;">
+                Confirmez sur votre telephone
+            </h3>
+            <p style="color: var(--text-muted, #9ca3af); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                Un prompt USSD a ete envoye sur votre telephone.<br>
+                Composez votre code PIN pour confirmer le paiement.
+            </p>
+            <div id="waitStatusIcon" style="margin-bottom: 1rem;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 1.5rem; color: var(--gold-500, #D4AF37);"></i>
+            </div>
+            <p id="waitStatusText" style="color: var(--text-muted, #9ca3af); font-size: 0.85rem;">
+                En attente de confirmation...
+            </p>
+            <button onclick="closeVoteModal()" style="margin-top: 1.5rem; background: none; border: 1px solid var(--border-color, #374151); color: var(--text-muted, #9ca3af); padding: 0.5rem 1.5rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem;">
+                Fermer
+            </button>
+        </div>
+    `;
+
+    // Demarrer le polling
+    pollPaymentStatus(depositId, itemId);
+}
+
+async function pollPaymentStatus(depositId, itemId) {
+    const maxAttempts = 40; // 40 * 3s = 2 min
+    let attempts = 0;
+
+    const poll = async () => {
+        attempts++;
+
+        try {
+            const res = await fetch(`${CONFIG.apiUrl}/payment/verifier?deposit_id=${encodeURIComponent(depositId)}`);
+            const data = await res.json();
+
+            if (data.success && data.statut !== 'en_attente') {
+                // Paiement termine
+                if (data.paiement_reussi) {
+                    showPaymentResult(true);
+                    // Recharger les candidats pour mettre a jour les compteurs
+                    loadCandidates();
+                } else {
+                    showPaymentResult(false);
+                }
+                return;
+            }
+        } catch (err) {
+            console.error('Erreur polling:', err);
+        }
+
+        if (attempts < maxAttempts) {
+            setTimeout(poll, 3000);
+        } else {
+            // Timeout
+            const statusText = document.getElementById('waitStatusText');
+            const statusIcon = document.getElementById('waitStatusIcon');
+            if (statusText) statusText.textContent = 'Delai d\'attente depasse. Verifiez dans "Mes votes".';
+            if (statusIcon) statusIcon.innerHTML = '<i class="fas fa-clock" style="font-size: 1.5rem; color: var(--text-muted, #9ca3af);"></i>';
+        }
+    };
+
+    setTimeout(poll, 3000);
+}
+
+function showPaymentResult(success) {
+    const waitScreen = document.getElementById('paymentWaitScreen');
+    if (!waitScreen) return;
+
+    if (success) {
+        waitScreen.innerHTML = `
+            <div style="text-align: center; padding: 2rem 1.5rem;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16,185,129,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
+                    <i class="fas fa-check" style="font-size: 2rem; color: #10B981;"></i>
+                </div>
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.5rem;">
+                    Paiement reussi !
+                </h3>
+                <p style="color: var(--text-muted, #9ca3af); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Votre vote a ete comptabilise avec succes. Merci pour votre soutien !
+                </p>
+                <button onclick="closeVoteModal()" style="background: var(--gold-500, #D4AF37); color: #000; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                    <i class="fas fa-check"></i> Fermer
+                </button>
+            </div>
+        `;
+        showToast('Vote comptabilise avec succes !', 'success');
+    } else {
+        waitScreen.innerHTML = `
+            <div style="text-align: center; padding: 2rem 1.5rem;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(239,68,68,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
+                    <i class="fas fa-xmark" style="font-size: 2rem; color: #EF4444;"></i>
+                </div>
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.5rem;">
+                    Paiement echoue
+                </h3>
+                <p style="color: var(--text-muted, #9ca3af); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Le paiement n'a pas abouti. Vous pouvez reessayer.
+                </p>
+                <button onclick="closeVoteModal()" style="background: var(--gold-500, #D4AF37); color: #000; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                    <i class="fas fa-arrow-left"></i> Fermer
+                </button>
+            </div>
+        `;
+        showToast('Le paiement a echoue. Reessayez.', 'error');
     }
 }
 
@@ -479,12 +689,12 @@ function showToast(message, type = 'info') {
 }
 
 // ========================================
-// DONATION
+// DONATION (STK Push PawaPay)
 // ========================================
 
 function setDonation(amount) {
     document.getElementById('donationAmount').value = amount;
-    document.querySelectorAll('.donation-amount-btn').forEach(btn => {
+    document.querySelectorAll('.donation-amount-btn:not(.don-operateur-btn)').forEach(btn => {
         const val = parseInt(btn.textContent.replace(/\s/g, '').replace('F', ''));
         btn.classList.toggle('active', val === amount);
     });
@@ -499,10 +709,17 @@ async function processDonation() {
         return;
     }
 
+    const telephone = document.getElementById('donTelephone')?.value?.replace(/\s/g, '');
+    if (!telephone || telephone.length < 8) {
+        showToast('Veuillez entrer un numero de telephone valide', 'error');
+        document.getElementById('donTelephone')?.focus();
+        return;
+    }
+
     const btn = document.getElementById('btnDonate');
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Redirection...</span>';
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Envoi au telephone...</span>';
 
     try {
         const res = await fetch(`${CONFIG.apiUrl}/payment/don`, {
@@ -512,14 +729,22 @@ async function processDonation() {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': CONFIG.csrfToken
             },
-            body: JSON.stringify({ montant: amount })
+            body: JSON.stringify({
+                montant: amount,
+                telephone: telephone,
+                operateur: appState.donOperateur,
+                gateway: appState.donGateway
+            })
         });
 
         const data = await res.json();
 
-        if (data.success && data.checkout_url) {
-            showToast('Redirection vers le paiement...', 'info');
-            setTimeout(() => { window.location.href = data.checkout_url; }, 800);
+        if (data.success && data.deposit_id) {
+            showToast('Prompt USSD envoye. Confirmez sur votre telephone.', 'info');
+
+            // Polling pour le don
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>En attente de confirmation...</span>';
+            pollDonationStatus(data.deposit_id, btn, originalHTML);
         } else {
             throw new Error(data.message || 'Erreur paiement');
         }
@@ -529,6 +754,45 @@ async function processDonation() {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
     }
+}
+
+async function pollDonationStatus(depositId, btn, originalHTML) {
+    const maxAttempts = 40;
+    let attempts = 0;
+
+    const poll = async () => {
+        attempts++;
+
+        try {
+            const res = await fetch(`${CONFIG.apiUrl}/payment/verifier?deposit_id=${encodeURIComponent(depositId)}`);
+            const data = await res.json();
+
+            if (data.success && data.statut !== 'en_attente') {
+                btn.disabled = false;
+                if (data.paiement_reussi) {
+                    showToast('Don recu avec succes ! Merci pour votre generosite.', 'success');
+                    btn.innerHTML = '<i class="fas fa-check"></i> <span>Don confirme !</span>';
+                    setTimeout(() => { btn.innerHTML = originalHTML; }, 3000);
+                } else {
+                    showToast('Le paiement du don a echoue.', 'error');
+                    btn.innerHTML = originalHTML;
+                }
+                return;
+            }
+        } catch (err) {
+            console.error('Erreur polling don:', err);
+        }
+
+        if (attempts < maxAttempts) {
+            setTimeout(poll, 3000);
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            showToast('Delai d\'attente depasse. Verifiez dans "Mes votes".', 'info');
+        }
+    };
+
+    setTimeout(poll, 3000);
 }
 
 // ========================================
@@ -561,6 +825,10 @@ window.handleOverlayClick = handleOverlayClick;
 window.incrementVotes = incrementVotes;
 window.decrementVotes = decrementVotes;
 window.setVotes = setVotes;
+window.setOperateur = setOperateur;
+window.setDonOperateur = setDonOperateur;
+window.setGateway = setGateway;
+window.setDonGateway = setDonGateway;
 window.processPayment = processPayment;
 window.scrollToFilieres = scrollToFilieres;
 window.scrollToDonation = scrollToDonation;
@@ -613,7 +881,7 @@ async function rechercherVotes() {
 
         resultsDiv.style.display = 'block';
 
-        // Résumé global
+        // Resume global
         if (votes.length > 0) {
             const votesConfirmes = votes.filter(v => v.statut === 'reussi');
             const totalVotesConfirmes = votesConfirmes.reduce((sum, v) => sum + v.nombre_votes, 0);
@@ -686,7 +954,6 @@ function renderVoteItem(v) {
     const isReussi = v.statut === 'reussi';
     const isEnAttente = v.statut === 'en_attente';
 
-    // Preuve : le candidat a bien X votes au total, dont Y de ce votant
     const preuveHtml = isReussi ? `
         <div class="lookup-proof">
             <i class="fas fa-check-circle"></i>
@@ -697,7 +964,6 @@ function renderVoteItem(v) {
         </div>
     ` : '';
 
-    // Bouton revérifier pour les votes en attente
     const reverifierHtml = isEnAttente ? `
         <button class="lookup-reverify" onclick="reverifierVote(${v.id}, this)">
             <i class="fas fa-sync-alt"></i>
@@ -731,25 +997,25 @@ async function reverifierVote(voteId, btn) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verification...';
 
     try {
-        // Chercher la transaction liée à ce vote
+        // Chercher la transaction liee a ce vote
         const response = await fetch(`/api/votes/${voteId}`);
         const data = await response.json();
 
-        if (data.success && data.vote?.transaction?.moneroo_id) {
-            // Forcer la vérification via l'API Moneroo
-            const checkResponse = await fetch(`/api/payment/retour?paymentId=${data.vote.transaction.moneroo_id}`);
+        if (data.success && data.vote?.transaction?.deposit_id) {
+            // Verifier via l'API PawaPay
+            const checkResponse = await fetch(`/api/payment/verifier?deposit_id=${data.vote.transaction.deposit_id}`);
             const checkData = await checkResponse.json();
 
             if (checkData.paiement_reussi) {
                 showToast('Paiement confirme ! Vos votes sont comptabilises.', 'success');
             } else {
-                showToast('Le paiement n\'est pas encore confirme. Reessayez dans quelques minutes.', 'warning');
+                showToast('Le paiement n\'est pas encore confirme. Reessayez dans quelques minutes.', 'info');
             }
         } else {
-            showToast('Impossible de verifier ce vote pour le moment.', 'warning');
+            showToast('Impossible de verifier ce vote pour le moment.', 'info');
         }
 
-        // Relancer la recherche pour mettre à jour l'affichage
+        // Relancer la recherche pour mettre a jour l'affichage
         rechercherVotes();
 
     } catch (err) {

@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Vote;
 use App\Models\Don;
 use App\Models\Transaction;
-use App\Services\MonerooService;
+use App\Services\PawapayService;
+use App\Services\FeexpayService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -14,18 +15,37 @@ use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
-    private function moneroo(): MonerooService
+    private function pawapay(): PawapayService
     {
-        return app(MonerooService::class);
+        return app(PawapayService::class);
+    }
+
+    private function feexpay(): FeexpayService
+    {
+        return app(FeexpayService::class);
     }
 
     /**
-     * Initier un paiement pour un vote
+     * Retourner le service de paiement correspondant à la gateway
+     */
+    private function getService(string $gateway): PawapayService|FeexpayService
+    {
+        return match ($gateway) {
+            Transaction::GATEWAY_FEEXPAY => $this->feexpay(),
+            default => $this->pawapay(),
+        };
+    }
+
+    /**
+     * Initier un paiement pour un vote (STK Push)
      */
     public function initierVote(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'vote_id' => 'required|integer|exists:votes,id',
+            'telephone' => 'required|string|min:8|max:20',
+            'operateur' => 'required|string|in:MTN,MOOV',
+            'gateway' => 'sometimes|string|in:pawapay,feexpay',
         ]);
 
         if ($validator->fails()) {
@@ -39,7 +59,6 @@ class PaymentController extends Controller
         try {
             $vote = Vote::findOrFail($request->vote_id);
 
-            // Vérifier que le vote est bien en attente
             if (!$vote->estEnAttente()) {
                 return response()->json([
                     'success' => false,
@@ -47,13 +66,21 @@ class PaymentController extends Controller
                 ], 400);
             }
 
-            $result = $this->moneroo()->initierPaiementVote($vote);
+            // Sauvegarder le téléphone sur le vote
+            if (!$vote->telephone) {
+                $vote->telephone = $request->telephone;
+                $vote->save();
+            }
+
+            $gateway = $request->input('gateway', Transaction::GATEWAY_PAWAPAY);
+            $service = $this->getService($gateway);
+            $result = $service->initierPaiementVote($vote, $request->telephone, $request->operateur);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Paiement initié avec succès',
-                'checkout_url' => $result['checkout_url'],
-                'moneroo_id' => $result['moneroo_id'],
+                'message' => 'Paiement initié. Confirmez sur votre téléphone.',
+                'deposit_id' => $result['deposit_id'],
+                'vote_id' => $vote->id,
             ]);
 
         } catch (\Exception $e) {
@@ -71,14 +98,17 @@ class PaymentController extends Controller
     }
 
     /**
-     * Initier un paiement pour un don
+     * Initier un paiement pour un don (STK Push)
      */
     public function initierDon(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'montant' => 'required|integer|min:' . config('concours.min_don', 100),
+            'telephone' => 'required|string|min:8|max:20',
+            'operateur' => 'required|string|in:MTN,MOOV',
             'nom_donateur' => 'nullable|string|max:100',
             'message' => 'nullable|string|max:500',
+            'gateway' => 'sometimes|string|in:pawapay,feexpay',
         ]);
 
         if ($validator->fails()) {
@@ -100,13 +130,15 @@ class PaymentController extends Controller
                 ]);
             });
 
-            $result = $this->moneroo()->initierPaiementDon($don);
+            $gateway = $request->input('gateway', Transaction::GATEWAY_PAWAPAY);
+            $service = $this->getService($gateway);
+            $result = $service->initierPaiementDon($don, $request->telephone, $request->operateur);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Paiement initié avec succès',
-                'checkout_url' => $result['checkout_url'],
-                'moneroo_id' => $result['moneroo_id'],
+                'message' => 'Paiement initié. Confirmez sur votre téléphone.',
+                'deposit_id' => $result['deposit_id'],
+                'don_id' => $don->id,
             ]);
 
         } catch (\Exception $e) {
@@ -124,16 +156,13 @@ class PaymentController extends Controller
     }
 
     /**
-     * Webhook Moneroo — réception des notifications de paiement
+     * Webhook PawaPay — réception des notifications de paiement
      */
     public function webhook(Request $request): JsonResponse
     {
-        // Vérifier la signature
-        $signature = $request->header('X-Moneroo-Signature', '');
-        $rawPayload = $request->getContent();
-
-        if (!$this->moneroo()->verifierSignature($rawPayload, $signature)) {
-            Log::warning('Webhook Moneroo : signature invalide', [
+        // Vérifier la signature (Content-Digest RFC-9421)
+        if (!$this->pawapay()->verifierSignature($request)) {
+            Log::warning('Webhook PawaPay : signature invalide', [
                 'ip' => $request->ip(),
             ]);
 
@@ -141,17 +170,17 @@ class PaymentController extends Controller
         }
 
         try {
-            Log::info('Webhook Moneroo reçu', [
-                'event' => $request->input('event'),
-                'moneroo_id' => $request->input('data.id'),
+            Log::info('Webhook PawaPay reçu', [
+                'deposit_id' => $request->input('depositId'),
+                'status' => $request->input('status'),
             ]);
 
-            $this->moneroo()->traiterWebhook($request->all());
+            $this->pawapay()->traiterWebhook($request->all());
 
             return response()->json(['success' => true]);
 
         } catch (\Exception $e) {
-            Log::error('Erreur webhook Moneroo', [
+            Log::error('Erreur webhook PawaPay', [
                 'error' => $e->getMessage(),
                 'payload' => $request->all(),
             ]);
@@ -161,39 +190,73 @@ class PaymentController extends Controller
     }
 
     /**
-     * COUCHE 1 : Vérification au retour de l'utilisateur
-     * Appelé quand l'utilisateur revient de Moneroo (return_url)
+     * Webhook FeexPay — réception des notifications de paiement
      */
-    public function retour(Request $request): JsonResponse
+    public function webhookFeexpay(Request $request): JsonResponse
     {
-        $paymentId = $request->query('paymentId');
-        $paymentStatus = $request->query('paymentStatus');
+        try {
+            Log::info('Webhook FeexPay reçu', [
+                'reference' => $request->input('reference') ?? $request->input('transref'),
+                'status' => $request->input('status'),
+            ]);
 
-        if (!$paymentId) {
+            $this->feexpay()->traiterWebhook($request->all());
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur webhook FeexPay', [
+                'error' => $e->getMessage(),
+                'payload' => $request->all(),
+            ]);
+
+            return response()->json(['success' => false], 500);
+        }
+    }
+
+    /**
+     * Vérifier le statut d'un dépôt PawaPay
+     */
+    public function verifierDepot(Request $request): JsonResponse
+    {
+        $depositId = $request->query('deposit_id');
+
+        if (!$depositId) {
             return response()->json([
                 'success' => false,
-                'message' => 'ID de paiement manquant',
+                'message' => 'deposit_id requis',
             ], 400);
         }
 
         try {
-            // Vérifier directement via l'API Moneroo (ne pas se fier au query param)
-            $reussi = $this->moneroo()->verifierPaiement($paymentId);
+            $transaction = Transaction::where('deposit_id', $depositId)->first();
 
-            $transaction = Transaction::where('moneroo_id', $paymentId)->first();
+            if (!$transaction) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaction introuvable',
+                ], 404);
+            }
+
+            // Si encore en attente, tenter une vérification via l'API
+            if ($transaction->statut === Transaction::STATUT_EN_ATTENTE) {
+                $service = $this->getService($transaction->gateway ?? Transaction::GATEWAY_PAWAPAY);
+                $service->verifierPaiement($depositId);
+                $transaction->refresh();
+            }
 
             return response()->json([
                 'success' => true,
-                'paiement_reussi' => $reussi,
-                'statut' => $transaction?->statut ?? 'inconnu',
-                'type' => $transaction?->type ?? 'inconnu',
-                'montant' => $transaction?->montant,
+                'statut' => $transaction->statut,
+                'type' => $transaction->type,
+                'montant' => $transaction->montant,
+                'paiement_reussi' => $transaction->statut === Transaction::STATUT_REUSSI,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Erreur vérification retour Moneroo', [
+            Log::error('Erreur vérification dépôt PawaPay', [
                 'error' => $e->getMessage(),
-                'paymentId' => $paymentId,
+                'deposit_id' => $depositId,
             ]);
 
             return response()->json([
@@ -205,8 +268,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * COUCHE 3 : Recherche par téléphone
-     * Permet aux votants de vérifier le statut de leurs votes/dons
+     * Recherche par téléphone
      */
     public function rechercher(Request $request): JsonResponse
     {
@@ -222,7 +284,7 @@ class PaymentController extends Controller
         }
 
         try {
-            $resultats = $this->moneroo()->rechercherParTelephone($request->telephone);
+            $resultats = $this->pawapay()->rechercherParTelephone($request->telephone);
 
             return response()->json([
                 'success' => true,
@@ -269,6 +331,8 @@ class PaymentController extends Controller
 
             DB::beginTransaction();
 
+            $gateway = $request->query('gateway', Transaction::GATEWAY_PAWAPAY);
+
             if ($voteId) {
                 $vote = Vote::findOrFail($voteId);
                 if (!$vote->estEnAttente()) {
@@ -279,11 +343,13 @@ class PaymentController extends Controller
 
                 Transaction::create([
                     'vote_id' => $vote->id,
-                    'moneroo_id' => 'SIM-' . uniqid(),
+                    'deposit_id' => 'SIM-' . uniqid(),
                     'montant' => $vote->montant_total,
                     'statut' => $statut === 'reussi' ? Transaction::STATUT_REUSSI : Transaction::STATUT_ECHOUE,
                     'type' => Transaction::TYPE_VOTE,
                     'telephone' => $vote->telephone,
+                    'operateur' => 'MTN',
+                    'gateway' => $gateway,
                     'response_data' => ['simulation' => true, 'date' => now()->toDateTimeString()],
                     'processed_at' => now(),
                 ]);
@@ -296,11 +362,13 @@ class PaymentController extends Controller
 
                 Transaction::create([
                     'don_id' => $don->id,
-                    'moneroo_id' => 'SIM-' . uniqid(),
+                    'deposit_id' => 'SIM-' . uniqid(),
                     'montant' => $don->montant,
                     'statut' => $statut === 'reussi' ? Transaction::STATUT_REUSSI : Transaction::STATUT_ECHOUE,
                     'type' => Transaction::TYPE_DON,
                     'telephone' => $don->telephone,
+                    'operateur' => 'MTN',
+                    'gateway' => $gateway,
                     'response_data' => ['simulation' => true, 'date' => now()->toDateTimeString()],
                     'processed_at' => now(),
                 ]);

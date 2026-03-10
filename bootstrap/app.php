@@ -12,9 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Exclure le webhook Moneroo de la vérification CSRF
+        // Exclure le webhook PawaPay de la vérification CSRF
         $middleware->validateCsrfTokens(except: [
-            'api/payment/webhook',
+            'api/payment/pawapay/callback',
+            'api/payment/feexpay/callback',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

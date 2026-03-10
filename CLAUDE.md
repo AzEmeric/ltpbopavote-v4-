@@ -4,16 +4,16 @@ Ce fichier guide Claude Code pour le développement de ce projet.
 
 ## Projet
 
-**LTP-BOPA VOTE** — Application web Laravel 12 pour le **Concours de l'Excellence 2025** organisé par le **Lycée Technique et Professionnel de Bopa** (Bénin). Les visiteurs votent pour leurs candidats favoris parmi les différentes filières en payant 100 FCFA par vote via Mobile Money (PawaPay / FeexPay).
+**LTP-BOPA VOTE** — Application web Laravel 12 pour le **Concours de l'Excellence 2025** organisé par le **Lycée Technique et Professionnel de Bopa** (Bénin). Les visiteurs votent pour leurs candidats favoris parmi les différentes filières en payant 100 FCFA par vote via Mobile Money (PawaPay STK Push).
 
 ## Stack technique
 
 - **Backend :** Laravel 12 (PHP 8.2+), architecture MVC stricte
-- **Base de données :** SQLite (dev) / **Supabase** PostgreSQL (production)
+- **Base de données :** SQLite (dev) / PostgreSQL Neon (production)
 - **Frontend :** Blade + Vanilla JS, Bootstrap 5 (CDN), Font Awesome 6.4
 - **Fonts :** Playfair Display (titres), DM Sans (corps)
 - **Assets :** Laravel Mix (webpack)
-- **Paiement :** PawaPay API v2 + FeexPay SDK PHP (double passerelle Mobile Money)
+- **Paiement :** PawaPay API v2 (STK Push — Mobile Money Bénin)
 
 ## Commandes
 
@@ -22,7 +22,7 @@ Ce fichier guide Claude Code pour le développement de ce projet.
 composer install && npm install
 cp .env.example .env && php artisan key:generate
 
-# Base de données (Supabase PostgreSQL)
+# Base de données
 php artisan migrate --seed
 
 # Développement
@@ -40,27 +40,29 @@ php artisan test                 # Tests PHPUnit
 
 **Dev (par défaut) :** SQLite — `DB_CONNECTION=sqlite` dans `.env`, fichier `database/database.sqlite`.
 
-**Production (Supabase PostgreSQL) :** Dans `.env` :
+**Production (PostgreSQL Neon) :** Dans `.env` :
 ```env
 DB_CONNECTION=pgsql
-DB_HOST=db.<project-ref>.supabase.co
+DB_HOST=ep-xxx.us-east-1.aws.neon.tech
 DB_PORT=5432
-DB_DATABASE=postgres
-DB_USERNAME=postgres
-DB_PASSWORD=<supabase-db-password>
+DB_DATABASE=neondb
+DB_USERNAME=neondb_owner
+DB_PASSWORD=<password>
+DB_SSLMODE=require
 ```
 
 **Notes PostgreSQL :** Pas de `unsigned()`, pas d'`ENUM` natif (utiliser `string` + validation applicative), types natifs PostgreSQL.
 
-## Système de paiement (PawaPay + FeexPay)
+## Système de paiement (PawaPay STK Push)
 
-### PawaPay (passerelle principale)
+### PawaPay (passerelle unique)
 
 - **Doc :** https://docs.pawapay.io
 - **Base URL :** Production `https://api.pawapay.io/` | Sandbox `https://api.sandbox.pawapay.io/`
 - **Auth :** Bearer token (header `Authorization: Bearer <token>`)
 - **Bénin supporté :** Oui — providers `MTN_MOMO_BEN` et `MOOV_BEN`, devise `XOF`
 - **Pas de décimales** pour les montants en XOF
+- **STK Push :** Le votant saisit son numéro + opérateur, reçoit un prompt USSD pour confirmer
 
 **Initier un dépôt (collecte de paiement) :**
 ```
@@ -80,36 +82,17 @@ POST /v2/deposits
 }
 ```
 
-**Callback (webhook) :** PawaPay envoie un `POST` à l'URL callback configurée quand le dépôt atteint un statut final (`COMPLETED` ou `FAILED`). Vérifier la signature via les headers `Content-Digest`, `Signature`, `Signature-Input`.
+**Callback (webhook) :** PawaPay envoie un `POST` à l'URL callback configurée quand le dépôt atteint un statut final (`COMPLETED` ou `FAILED`). Vérifier la signature via les headers `Content-Digest`, `Signature`, `Signature-Input` (RFC-9421).
+
+**Mapping opérateurs :** `MTN` → `MTN_MOMO_BEN`, `MOOV` → `MOOV_BEN`
+
+**Mapping statuts PawaPay :** `COMPLETED` → `reussi`, `FAILED` → `echoue`, `REJECTED` → `echoue`, `CANCELLED` → `annule`
 
 **Variables `.env` :**
 ```env
 PAWAPAY_API_TOKEN=<token>
 PAWAPAY_BASE_URL=https://api.sandbox.pawapay.io
 PAWAPAY_CALLBACK_URL=https://mondomaine.com/api/payment/pawapay/callback
-```
-
-### FeexPay (passerelle secondaire)
-
-- **Doc :** https://docs.feexpay.me
-- **SDK PHP :** `composer require feexpayme/feexpay-sdk-php`
-- **Auth :** Shop ID + API Token
-- **Opérateurs Bénin :** MTN, MOOV
-- **Devises :** XOF, USD, EUR
-
-**Utilisation SDK :**
-```php
-$feexpay = new FeexpayClass($shopId, $apiToken, $callbackUrl, "SANDBOX");
-$response = $feexpay->paiementLocal($montant, $telephone, "MTN", $nom, $email);
-$status = $feexpay->getPaiementStatus($response);
-```
-
-**Variables `.env` :**
-```env
-FEEXPAY_SHOP_ID=<shop_id>
-FEEXPAY_API_TOKEN=<token>
-FEEXPAY_CALLBACK_URL=https://mondomaine.com/api/payment/feexpay/callback
-FEEXPAY_MODE=SANDBOX
 ```
 
 ### Config `config/concours.php`
@@ -119,7 +102,11 @@ FEEXPAY_MODE=SANDBOX
 'currency' => 'XOF',
 'filieres' => ['DWM', 'PM', 'MMV', 'BTP', 'EA'],
 'max_votes_per_transaction' => 100,
-'payment_gateway' => env('PAYMENT_GATEWAY', 'pawapay'), // 'pawapay' ou 'feexpay'
+'pawapay' => [
+    'api_token'    => env('PAWAPAY_API_TOKEN'),
+    'base_url'     => env('PAWAPAY_BASE_URL', 'https://api.sandbox.pawapay.io'),
+    'callback_url' => env('PAWAPAY_CALLBACK_URL'),
+],
 'payment_simulation' => env('PAYMENT_SIMULATION', false),
 ```
 
@@ -132,25 +119,30 @@ app/
 ├── Http/Controllers/
 │   ├── CandidatController.php    # CRUD candidats, filtrage par filière, stats
 │   ├── VoteController.php        # Création vote, consultation, stats
-│   └── PaymentController.php     # Initiation paiement, callbacks, simulation
+│   └── PaymentController.php     # Initiation paiement PawaPay, webhook, simulation
 ├── Models/
 │   ├── Candidat.php              # Scopes: filiere(), populaires()
 │   ├── Vote.php                  # Boot hook: auto transaction_id, auto-incrémente total_votes
-│   └── Transaction.php           # Référence paiement, réponse JSON
-├── Services/                     # (à créer) Logique paiement découplée
-│   ├── PawapayService.php        # Intégration PawaPay API v2
-│   └── FeexpayService.php        # Intégration FeexPay SDK
+│   ├── Don.php                   # Dons libres
+│   └── Transaction.php           # deposit_id PawaPay, statut, operateur
+├── Services/
+│   └── PawapayService.php        # Intégration PawaPay API v2 (STK Push)
+├── Console/Commands/
+│   └── ReconcilierPaiements.php  # Tâche planifiée de réconciliation
 bootstrap/
 ├── app.php                       # Config app Laravel 12 (routes, middleware, exceptions)
 ├── providers.php                 # Providers (AppServiceProvider uniquement)
-config/concours.php               # Seul fichier config custom (les autres utilisent les defaults Laravel 12)
+config/concours.php               # Seul fichier config custom
 routes/api.php                    # Routes API publiques
 routes/web.php                    # Pages web
+routes/console.php                # Tâches planifiées
 public/css/app.css                # Styles (variables CSS, responsive)
 public/js/app.js                  # Logique SPA
 resources/views/
 ├── layouts/app.blade.php         # Layout maître
-└── welcome.blade.php             # Page principale
+├── welcome.blade.php             # Page principale (vote)
+├── don.blade.php                 # Page de don
+└── mes-votes.blade.php           # Suivi des votes par téléphone
 ```
 
 ### Modèles et relations
@@ -158,16 +150,19 @@ resources/views/
 | Modèle | Relations | Champs clés |
 |--------|-----------|-------------|
 | `Candidat` | hasMany(Vote) | nom, prenom, filiere, photo_url, description, total_votes |
-| `Vote` | belongsTo(Candidat), hasOne(Transaction) | nombre_votes, montant_total, transaction_id, statut_paiement (en_attente/reussi/echoue), ip_address |
-| `Transaction` | belongsTo(Vote) | reference_externe, montant, statut, gateway (pawapay/feexpay), response_data (JSON) |
+| `Vote` | belongsTo(Candidat), hasOne(Transaction) | nombre_votes, montant_total, transaction_id, statut_paiement (en_attente/reussi/echoue), telephone, ip_address |
+| `Don` | hasOne(Transaction) | montant, telephone, nom_donateur, statut, message |
+| `Transaction` | belongsTo(Vote), belongsTo(Don) | deposit_id (UUID PawaPay), montant, statut, operateur (MTN/MOOV), response_data (JSON) |
 
-### Flux de paiement (mis à jour)
+### Flux de paiement (STK Push)
 
-1. `POST /api/votes` → Crée un vote en attente
-2. `POST /api/payment/initier` → Détecte la gateway active, initie le paiement via PawaPay ou FeexPay
-3. `POST /api/payment/pawapay/callback` → Webhook PawaPay (statut COMPLETED/FAILED)
-4. `POST /api/payment/feexpay/callback` → Webhook FeexPay
-5. Dev : `GET /api/payment/simulate?vote_id=X&statut=reussi` (nécessite `PAYMENT_SIMULATION=true`)
+1. Votant choisit candidat + nombre de votes + saisit **téléphone** + sélectionne **opérateur** (MTN/MOOV)
+2. `POST /api/votes` → Crée un vote en attente
+3. `POST /api/payment/vote` → `PawapayService` envoie `POST /v2/deposits` à PawaPay
+4. L'utilisateur reçoit un **prompt USSD** sur son téléphone et confirme avec son code PIN
+5. Le frontend affiche "Confirmez sur votre téléphone" + **polling** `GET /api/payment/verifier?deposit_id=X` (toutes les 3s pendant 2 min)
+6. `POST /api/payment/pawapay/callback` → Webhook PawaPay confirme le paiement côté serveur
+7. Dev : `GET /api/payment/simulate?vote_id=X&statut=reussi` (nécessite `PAYMENT_SIMULATION=true`)
 
 ### Routes API (toutes publiques)
 
@@ -180,9 +175,11 @@ POST   /api/votes                              # Créer un vote
 GET    /api/votes/{id}                         # Détail vote
 GET    /api/votes/candidat/{candidatId}        # Votes d'un candidat
 GET    /api/votes/statistiques/all             # Stats votes
-POST   /api/payment/initier                    # Initier paiement
+POST   /api/payment/vote                       # Initier paiement vote (STK Push)
+POST   /api/payment/don                        # Initier paiement don (STK Push)
 POST   /api/payment/pawapay/callback           # Webhook PawaPay
-POST   /api/payment/feexpay/callback           # Webhook FeexPay
+GET    /api/payment/verifier                   # Vérifier statut dépôt
+GET    /api/payment/rechercher                 # Recherche par téléphone
 GET    /api/payment/simulate                   # Simulation (dev)
 GET    /api/ping                               # Health check
 ```
@@ -209,7 +206,7 @@ GET    /api/ping                               # Health check
   - Valider et sanitiser toutes les entrées
   - Blade : `{{ }}` (échappé) par défaut, `{!! !!}` uniquement si nécessaire et justifié
   - Rate limiting sur les endpoints votes et paiement
-  - Vérifier les signatures des webhooks PawaPay (headers RFC-9421)
+  - Vérifier les signatures des webhooks PawaPay (Content-Digest RFC-9421)
   - Protection CSRF sur les routes web
   - Ne jamais exposer les clés API côté client
 - **Nommage :** camelCase (méthodes/variables), PascalCase (classes), snake_case (colonnes DB, clés config)
@@ -248,7 +245,7 @@ GET    /api/ping                               # Health check
 
 - **Pas d'authentification utilisateur** : Routes API publiques (vote anonyme). Sécuriser par rate limiting et validation.
 - **Intégrité des votes** : Le boot hook du modèle Vote gère l'incrémentation atomique de `total_votes`. Ne jamais modifier `total_votes` manuellement.
-- **Double gateway** : Le `PaymentController` doit déléguer à `PawapayService` ou `FeexpayService` selon `config('concours.payment_gateway')`. Pattern Strategy recommandé.
-- **Base de données** : SQLite en dev, PostgreSQL (Supabase) en prod. Pas de `unsigned()`, pas d'`ENUM` natif dans les migrations.
-- **Secrets** : `.env` jamais commité. Clés PawaPay, FeexPay et Supabase dans `.env` uniquement.
+- **PawaPay STK Push** : Pas de redirection vers une page checkout. Le votant confirme sur son téléphone via USSD. Le frontend fait du polling pour connaître le résultat.
+- **Base de données** : SQLite en dev, PostgreSQL (Neon) en prod. Pas de `unsigned()`, pas d'`ENUM` natif dans les migrations.
+- **Secrets** : `.env` jamais commité. Clés PawaPay dans `.env` uniquement.
 - **Config** : Ne pas utiliser `url()` ou `route()` dans les fichiers `config/` (pas disponible au boot). Utiliser `env()` uniquement.

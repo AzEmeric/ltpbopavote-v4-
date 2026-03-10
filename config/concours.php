@@ -45,25 +45,41 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Moneroo — Passerelle de paiement unique
+    | PawaPay — Passerelle de paiement (STK Push)
     |--------------------------------------------------------------------------
     |
-    | Doc : https://docs.moneroo.io
-    | SDK Laravel : composer require moneroo/moneroo-laravel
-    | API Base URL : https://api.moneroo.io/v1
-    | Auth : Bearer token (Secret Key)
+    | Doc : https://docs.pawapay.io
+    | API Base URL : Production https://api.pawapay.io/ | Sandbox https://api.sandbox.pawapay.io/
+    | Auth : Bearer token (API Token)
+    | Bénin : MTN_MOMO_BEN, MOOV_BEN — devise XOF (pas de décimales)
     |
-    | Webhooks events :
-    |   - payment.initiated, payment.success, payment.failed, payment.cancelled
-    | Signature : X-Moneroo-Signature (HMAC-SHA256 avec webhook secret)
+    | Webhook : POST callback avec headers Content-Digest, Signature, Signature-Input (RFC-9421)
+    | Statuts : COMPLETED, FAILED, REJECTED, CANCELLED
     |
     */
 
-    'moneroo' => [
-        'secret_key'     => env('MONEROO_SECRET_KEY'),
-        'public_key'     => env('MONEROO_PUBLIC_KEY'),
-        'webhook_secret' => env('MONEROO_WEBHOOK_SECRET'),
-        'return_url'     => env('MONEROO_RETURN_URL', '/paiement/retour'),
+    'pawapay' => [
+        'api_token'    => env('PAWAPAY_API_TOKEN'),
+        'base_url'     => env('PAWAPAY_BASE_URL', 'https://api.sandbox.pawapay.io'),
+        'callback_url' => env('PAWAPAY_CALLBACK_URL'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | FeexPay — Passerelle de paiement alternative
+    |--------------------------------------------------------------------------
+    |
+    | Doc : https://feexpay.me
+    | API : https://api.feexpay.me
+    | Paiement local Mobile Money (MTN, MOOV) via SDK PHP
+    |
+    */
+
+    'feexpay' => [
+        'shop_id'      => env('FEEXPAY_SHOP_ID'),
+        'api_token'    => env('FEEXPAY_API_TOKEN'),
+        'callback_url' => env('FEEXPAY_CALLBACK_URL'),
+        'mode'         => env('FEEXPAY_MODE', 'SANDBOX'),
     ],
 
     // Activer la simulation de paiement (développement uniquement)

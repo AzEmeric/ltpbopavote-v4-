@@ -8,5 +8,5 @@ use Illuminate\Support\Facades\Schedule;
 |--------------------------------------------------------------------------
 */
 
-// Réconciliation des paiements Moneroo toutes les 5 minutes
+// Réconciliation des paiements PawaPay toutes les 5 minutes
 Schedule::command('paiements:reconcilier')->everyFiveMinutes();

@@ -247,25 +247,68 @@
             </div>
 
             <div class="modal-body">
-                <label class="input-label">Nombre de votes</label>
-                <div class="vote-stepper">
-                    <button class="stepper-btn" onclick="decrementVotes()" aria-label="Moins">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <input type="number" class="stepper-input" id="nombreVotes" value="1" min="1" max="100">
-                    <button class="stepper-btn" onclick="incrementVotes()" aria-label="Plus">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                <!-- Section 1 : Nombre de votes -->
+                <div class="modal-section">
+                    <label class="input-label">
+                        <i class="fas fa-heart modal-section-icon"></i>
+                        Nombre de votes
+                    </label>
+                    <div class="vote-stepper">
+                        <button class="stepper-btn" onclick="decrementVotes()" aria-label="Moins">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" class="stepper-input" id="nombreVotes" value="1" min="1" max="100">
+                        <button class="stepper-btn" onclick="incrementVotes()" aria-label="Plus">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <div class="quick-votes">
+                        <button class="quick-vote-btn" onclick="setVotes(1)">1</button>
+                        <button class="quick-vote-btn" onclick="setVotes(5)">5</button>
+                        <button class="quick-vote-btn" onclick="setVotes(10)">10</button>
+                        <button class="quick-vote-btn" onclick="setVotes(25)">25</button>
+                        <button class="quick-vote-btn" onclick="setVotes(50)">50</button>
+                    </div>
                 </div>
 
-                <div class="quick-votes">
-                    <button class="quick-vote-btn" onclick="setVotes(1)">1</button>
-                    <button class="quick-vote-btn" onclick="setVotes(5)">5</button>
-                    <button class="quick-vote-btn" onclick="setVotes(10)">10</button>
-                    <button class="quick-vote-btn" onclick="setVotes(25)">25</button>
-                    <button class="quick-vote-btn" onclick="setVotes(50)">50</button>
+                <!-- Section 2 : Paiement Mobile Money -->
+                <div class="modal-section">
+                    <label class="input-label">
+                        <i class="fas fa-mobile-alt modal-section-icon"></i>
+                        Paiement Mobile Money
+                    </label>
+
+                    <!-- Choix de la passerelle -->
+                    <div class="gateway-group" style="margin-bottom: 1rem;">
+                        <button class="gateway-btn active" onclick="setGateway('pawapay')" data-gw="pawapay">
+                            <i class="fas fa-mobile-screen-button"></i>
+                            PawaPay
+                        </button>
+                        <button class="gateway-btn" onclick="setGateway('feexpay')" data-gw="feexpay">
+                            <i class="fas fa-credit-card"></i>
+                            FeexPay
+                        </button>
+                    </div>
+
+                    <div class="phone-input-group">
+                        <span class="phone-prefix">+229</span>
+                        <input type="tel" class="phone-input" id="voteTelephone" placeholder="96 00 00 00" maxlength="12" autocomplete="tel">
+                    </div>
+
+                    <div class="operateur-group">
+                        <button class="operateur-btn active" onclick="setOperateur('MTN')" data-op="MTN">
+                            <span class="operateur-dot operateur-dot--mtn"></span>
+                            MTN MoMo
+                        </button>
+                        <button class="operateur-btn" onclick="setOperateur('MOOV')" data-op="MOOV">
+                            <span class="operateur-dot operateur-dot--moov"></span>
+                            Moov Money
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Section 3 : Resume -->
                 <div class="price-breakdown">
                     <div class="price-row">
                         <span>Prix unitaire</span>
@@ -282,16 +325,16 @@
                 </div>
 
                 <div class="secure-badge">
-                    <i class="fas fa-lock"></i>
-                    Paiement securise via Mobile Money
+                    <i class="fas fa-shield-alt"></i>
+                    Paiement securise — vous recevrez un prompt USSD sur votre telephone
                 </div>
             </div>
 
             <div class="modal-foot">
                 <button class="btn-cancel" onclick="closeVoteModal()">Annuler</button>
                 <button class="btn-pay" id="btnPay" onclick="processPayment()">
-                    <i class="fas fa-heart"></i>
-                    <span>Voter</span>
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Confirmer</span>
                     <span class="btn-pay-amount" id="btnPayAmount">{{ config('concours.vote_price') }} FCFA</span>
                 </button>
             </div>

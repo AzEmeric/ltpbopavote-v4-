@@ -20,12 +20,13 @@ class Transaction extends Model
     protected $fillable = [
         'vote_id',
         'don_id',
-        'moneroo_id',
-        'checkout_url',
+        'deposit_id',
         'montant',
         'statut',
         'type',
         'telephone',
+        'operateur',
+        'gateway',
         'metadata',
         'response_data',
         'processed_at',
@@ -52,7 +53,7 @@ class Transaction extends Model
     const TYPE_DON = 'don';
 
     /**
-     * Statuts (alignés sur Moneroo : success, failed, cancelled → reussi, echoue, annule)
+     * Statuts
      */
     const STATUT_EN_ATTENTE = 'en_attente';
     const STATUT_REUSSI = 'reussi';
@@ -60,15 +61,22 @@ class Transaction extends Model
     const STATUT_ANNULE = 'annule';
 
     /**
-     * Mapping statut Moneroo → statut interne
+     * Gateways de paiement
      */
-    public static function mapStatutMoneroo(string $monerooStatus): string
+    const GATEWAY_PAWAPAY = 'pawapay';
+    const GATEWAY_FEEXPAY = 'feexpay';
+
+    /**
+     * Mapping statut PawaPay → statut interne
+     */
+    public static function mapStatutPawapay(string $pawapayStatus): string
     {
-        return match ($monerooStatus) {
-            'success'   => self::STATUT_REUSSI,
-            'failed'    => self::STATUT_ECHOUE,
-            'cancelled' => self::STATUT_ANNULE,
-            default     => self::STATUT_EN_ATTENTE,
+        return match ($pawapayStatus) {
+            'COMPLETED'  => self::STATUT_REUSSI,
+            'FAILED'     => self::STATUT_ECHOUE,
+            'REJECTED'   => self::STATUT_ECHOUE,
+            'CANCELLED'  => self::STATUT_ANNULE,
+            default      => self::STATUT_EN_ATTENTE,
         };
     }
 

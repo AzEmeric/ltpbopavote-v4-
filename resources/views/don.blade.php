@@ -24,6 +24,7 @@
 
                     <div class="donation-separator"></div>
 
+                    <!-- Montant -->
                     <p class="donation-label">Choisissez un montant</p>
                     <div class="donation-actions">
                         <button class="donation-amount-btn" onclick="setDonation(500)">500 F</button>
@@ -40,22 +41,60 @@
                         </div>
                     </div>
 
+                    <div class="donation-separator"></div>
+
+                    <!-- Paiement Mobile Money -->
+                    <p class="donation-label">
+                        <i class="fas fa-mobile-alt" style="color: var(--gold-500); margin-right: .25rem;"></i>
+                        Paiement Mobile Money
+                    </p>
+
+                    <!-- Choix de la passerelle -->
+                    <div class="gateway-group" style="margin-bottom: 1rem;">
+                        <button class="gateway-btn don-gateway-btn active" onclick="setDonGateway('pawapay')" data-gw="pawapay">
+                            <i class="fas fa-mobile-screen-button"></i>
+                            PawaPay
+                        </button>
+                        <button class="gateway-btn don-gateway-btn" onclick="setDonGateway('feexpay')" data-gw="feexpay">
+                            <i class="fas fa-credit-card"></i>
+                            FeexPay
+                        </button>
+                    </div>
+
+                    <div class="donation-custom">
+                        <div class="phone-input-group">
+                            <span class="phone-prefix">+229</span>
+                            <input type="tel" class="phone-input" id="donTelephone" placeholder="96 00 00 00" maxlength="12" autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <div class="operateur-group" id="donOperateurSelector" style="margin-bottom: 1.25rem;">
+                        <button class="operateur-btn don-operateur-btn active" onclick="setDonOperateur('MTN')" data-op="MTN">
+                            <span class="operateur-dot operateur-dot--mtn"></span>
+                            MTN MoMo
+                        </button>
+                        <button class="operateur-btn don-operateur-btn" onclick="setDonOperateur('MOOV')" data-op="MOOV">
+                            <span class="operateur-dot operateur-dot--moov"></span>
+                            Moov Money
+                        </button>
+                    </div>
+
                     <button class="btn-donate" id="btnDonate" onclick="processDonation()">
-                        <i class="fas fa-heart"></i>
-                        <span>Faire un don</span>
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Confirmer le don</span>
                     </button>
 
                     <div class="donation-trust">
                         <div class="donation-trust-item">
-                            <i class="fas fa-lock"></i>
+                            <i class="fas fa-shield-alt"></i>
                             <span>Paiement securise</span>
                         </div>
                         <div class="donation-trust-item">
                             <i class="fas fa-mobile-alt"></i>
-                            <span>MTN & Moov</span>
+                            <span>Prompt USSD</span>
                         </div>
                         <div class="donation-trust-item">
-                            <i class="fas fa-shield-alt"></i>
+                            <i class="fas fa-lock"></i>
                             <span>100% confidentiel</span>
                         </div>
                     </div>

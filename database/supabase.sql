@@ -69,19 +69,19 @@ CREATE INDEX idx_dons_telephone ON dons (telephone);
 CREATE INDEX idx_dons_created_at ON dons (created_at);
 
 -- ──────────────────────────────────────────
--- 4. TABLE : transactions (Moneroo)
+-- 4. TABLE : transactions (PawaPay)
 -- ──────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS transactions (
     id BIGSERIAL PRIMARY KEY,
     vote_id BIGINT REFERENCES votes(id) ON DELETE SET NULL,
     don_id BIGINT REFERENCES dons(id) ON DELETE SET NULL,
-    moneroo_id VARCHAR(150),
-    checkout_url VARCHAR(500),
+    deposit_id VARCHAR(150),
     montant INTEGER NOT NULL,
     statut VARCHAR(30) NOT NULL DEFAULT 'en_attente',
     type VARCHAR(20) NOT NULL DEFAULT 'vote',
     telephone VARCHAR(20),
+    operateur VARCHAR(10),
     metadata JSONB,
     response_data JSONB,
     processed_at TIMESTAMP,
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_transactions_moneroo_id ON transactions (moneroo_id);
+CREATE INDEX idx_transactions_deposit_id ON transactions (deposit_id);
 CREATE INDEX idx_transactions_vote_id ON transactions (vote_id);
 CREATE INDEX idx_transactions_don_id ON transactions (don_id);
 CREATE INDEX idx_transactions_statut ON transactions (statut);
