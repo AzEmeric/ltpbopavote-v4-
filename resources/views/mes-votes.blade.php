@@ -143,6 +143,8 @@
     votesList.innerHTML = votesData.reverse().map(v => {
         const statutLabel = { reussi: 'Confirme', en_attente: 'En attente', echoue: 'Echoue', inconnu: 'Inconnu' };
         const isReussi = v.statut === 'reussi';
+        const totalApres = v.candidat_total_votes || 0;
+        const totalAvant = isReussi ? totalApres - v.nombre_votes : totalApres;
 
         return `
             <div class="lookup-item lookup-item--${v.statut}">
@@ -164,9 +166,19 @@
                     </div>
                 </div>
                 ${isReussi ? `
-                <div class="lookup-proof">
-                    <i class="fas fa-check-circle"></i>
-                    <span>+${v.nombre_votes} vote${v.nombre_votes > 1 ? 's' : ''} comptabilise${v.nombre_votes > 1 ? 's' : ''} — total actuel : <strong>${(v.candidat_total_votes || 0).toLocaleString('fr-FR')}</strong></span>
+                <div class="lookup-scores">
+                    <div class="lookup-score">
+                        <span class="lookup-score-label">Avant</span>
+                        <span class="lookup-score-value">${totalAvant.toLocaleString('fr-FR')}</span>
+                    </div>
+                    <div class="lookup-score-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="lookup-score-diff">+${v.nombre_votes}</span>
+                    </div>
+                    <div class="lookup-score lookup-score--after">
+                        <span class="lookup-score-label">Apres</span>
+                        <span class="lookup-score-value">${totalApres.toLocaleString('fr-FR')}</span>
+                    </div>
                 </div>` : ''}
             </div>
         `;

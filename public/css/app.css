@@ -1676,6 +1676,41 @@ button { font-family: inherit; cursor: pointer; }
 .lookup-proof i { color: inherit; font-size: .75rem; flex-shrink: 0; }
 .lookup-proof strong { font-weight: 800; }
 
+/* Scores avant/après */
+.lookup-scores {
+    display: flex; align-items: center; justify-content: center;
+    gap: .75rem; margin-top: .75rem;
+    padding: .6rem .8rem;
+    background: rgba(16,185,129,.06);
+    border-radius: .5rem;
+    border: 1px solid rgba(16,185,129,.1);
+}
+.lookup-score {
+    display: flex; flex-direction: column; align-items: center; gap: .15rem;
+    min-width: 60px;
+}
+.lookup-score-label {
+    font-size: .6rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+    color: var(--text-muted);
+}
+.lookup-score-value {
+    font-size: 1.05rem; font-weight: 800;
+    color: var(--text-secondary);
+}
+.lookup-score--after .lookup-score-value {
+    color: #34D399;
+}
+.lookup-score-arrow {
+    display: flex; flex-direction: column; align-items: center; gap: .1rem;
+    color: var(--gold-500);
+}
+.lookup-score-arrow i { font-size: .7rem; }
+.lookup-score-diff {
+    font-size: .7rem; font-weight: 800;
+    color: var(--gold-500);
+}
+
 .lookup-reverify {
     display: flex; align-items: center; gap: .35rem;
     margin-top: .5rem;
@@ -2020,8 +2055,18 @@ button { font-family: inherit; cursor: pointer; }
     .donation-amount-btn { padding: .55rem .5rem; font-size: .82rem; }
     .donation-trust { gap: .75rem; }
 
-    .lookup-card { padding: 2rem 1.25rem; }
-    .lookup-item { padding: .75rem 1rem; }
+    .lookup-card { padding: 1.5rem 1rem; }
+    .lookup-item { padding: .75rem .75rem; }
+    .lookup-item-header { gap: .6rem; flex-wrap: wrap; }
+    .lookup-item-avatar { width: 40px; height: 40px; }
+    .lookup-item-name { font-size: .85rem; }
+    .lookup-item-right { flex-direction: row; align-items: center; gap: .5rem; width: 100%; justify-content: space-between; margin-top: .4rem; padding-top: .4rem; border-top: 1px solid var(--border-default); }
+    .lookup-item-amount { font-size: .9rem; }
+    .lookup-summary { flex-wrap: wrap; gap: .5rem; }
+    .lookup-summary-stat { flex: 1 1 calc(50% - .5rem); min-width: 0; padding: .6rem .4rem; }
+    .lookup-summary-value { font-size: .9rem; }
+    .lookup-scores { gap: .5rem; padding: .5rem .6rem; }
+    .lookup-score-value { font-size: .9rem; }
     .sticky-link span { display: none; }
 
     .candidates-grid { grid-template-columns: 1fr; }
@@ -2259,6 +2304,20 @@ button { font-family: inherit; cursor: pointer; }
 }
 .success-modal-btn:active {
     transform: translateY(0);
+}
+
+/* Failure modal overrides */
+.failure-modal-icon {
+    background: linear-gradient(135deg, #EF4444, #DC2626) !important;
+    box-shadow: 0 8px 24px rgba(239,68,68,.3) !important;
+}
+.failure-modal-btn {
+    background: linear-gradient(135deg, #EF4444, #DC2626) !important;
+    color: var(--white) !important;
+    box-shadow: 0 4px 16px rgba(239,68,68,.3) !important;
+}
+.failure-modal-btn:hover {
+    box-shadow: 0 12px 32px rgba(239,68,68,.4) !important;
 }
 
 @media (max-width: 480px) {

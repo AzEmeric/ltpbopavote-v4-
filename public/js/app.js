@@ -31,8 +31,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (filiere) {
             showFiliere(filiere);
         }
-        if (params.get('paymentStatus') === 'success') {
+        const status = params.get('paymentStatus');
+        if (status === 'success') {
             showSuccessModal();
+        } else if (status === 'failed' || status === 'cancelled' || status === 'error') {
+            showFailureModal();
         }
         // Nettoyer l'URL
         window.history.replaceState({}, '', '/');
@@ -299,7 +302,7 @@ function setVotes(n) {
 function incrementVotes() {
     const input = document.getElementById('nombreVotes');
     let v = parseInt(input.value) || 1;
-    if (v < 100) { v++; input.value = v; updatePaymentSummary(); highlightQuickVote(v); }
+    if (v < 900) { v++; input.value = v; updatePaymentSummary(); highlightQuickVote(v); }
 }
 
 function decrementVotes() {
@@ -328,10 +331,16 @@ function updatePaymentSummary() {
 function initEventListeners() {
     const input = document.getElementById('nombreVotes');
     if (input) {
-        input.addEventListener('input', (e) => {
-            let v = parseInt(e.target.value) || 1;
+        // Mettre à jour le résumé pendant la saisie sans forcer la valeur
+        input.addEventListener('input', () => {
+            updatePaymentSummary();
+            highlightQuickVote(parseInt(input.value) || 0);
+        });
+        // Valider et corriger quand l'utilisateur quitte le champ
+        input.addEventListener('blur', () => {
+            let v = parseInt(input.value) || 1;
             v = Math.max(1, Math.min(900, v));
-            e.target.value = v;
+            input.value = v;
             updatePaymentSummary();
             highlightQuickVote(v);
         });
@@ -606,6 +615,60 @@ function closeSuccessModal(overlay) {
     overlay.classList.remove('active');
     document.body.style.overflow = '';
     setTimeout(() => overlay.remove(), 300);
+}
+
+// ========================================
+// MODAL ECHEC PAIEMENT
+// ========================================
+
+function showFailureModal() {
+    const type = localStorage.getItem('paiement_type') || 'vote';
+    localStorage.removeItem('paiement_type');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'success-modal-overlay failure-modal-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) closeSuccessModal(overlay); };
+
+    let detailsHtml = '';
+    if (type === 'vote') {
+        const mesVotes = JSON.parse(localStorage.getItem('mes_votes') || '[]');
+        const dernierVote = mesVotes.length > 0 ? mesVotes[mesVotes.length - 1] : null;
+        if (dernierVote) {
+            detailsHtml = `
+            <div class="success-modal-details">
+                <div class="success-modal-detail">
+                    <i class="fas fa-user"></i>
+                    <span>${escapeHtml(dernierVote.candidat)}</span>
+                </div>
+                <div class="success-modal-detail">
+                    <i class="fas fa-coins"></i>
+                    <span>${formatNumber(dernierVote.montant)} FCFA</span>
+                </div>
+            </div>`;
+        }
+    }
+
+    overlay.innerHTML = `
+        <div class="success-modal failure-modal">
+            <div class="success-modal-icon failure-modal-icon">
+                <i class="fas fa-times"></i>
+            </div>
+            <h2 class="success-modal-title">Paiement echoue</h2>
+            <p class="success-modal-text">
+                Votre paiement n'a pas abouti. Aucun montant n'a ete debite.
+                Vous pouvez reessayer a tout moment.
+            </p>
+            ${detailsHtml}
+            <button class="success-modal-btn failure-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay'))">
+                <i class="fas fa-redo"></i>
+                <span>Reessayer</span>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => overlay.classList.add('active'));
 }
 
 // ========================================
