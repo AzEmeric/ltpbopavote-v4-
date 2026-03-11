@@ -309,7 +309,9 @@
                     <h4>Contact</h4>
                     <ul>
                         <li><i class="fas fa-envelope"></i> contact@ltpbopa.bj</li>
-                        <li><i class="fas fa-phone"></i> (+229) 01 97 19 09 84 / 01 94 48 80 64 / 01 97 60 38 66</li>
+                        <li><i class="fas fa-phone"></i> (+229) 01 97 19 09 84</li>
+                        <li><i class="fas fa-phone"></i> (+229) 01 94 48 80 64</li>
+                        <li><i class="fas fa-phone"></i> (+229) 01 97 60 38 66</li>
                         <li><i class="fas fa-location-dot"></i> Bopa, Bénin</li>
                     </ul>
                 </div>
