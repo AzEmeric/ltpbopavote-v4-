@@ -189,11 +189,11 @@ function renderCandidates() {
     emptyEl.style.display = 'none';
     gridEl.style.display = 'grid';
 
-    // Find max votes for progress bar
-    const maxVotes = Math.max(...candidats.map(c => c.total_votes || 0), 1);
+    // Progress bar max reference (700 votes = 100%)
+    const maxVotes = 700;
 
     gridEl.innerHTML = candidats.map((c, i) => {
-        const progress = maxVotes > 0 ? Math.round(((c.total_votes || 0) / maxVotes) * 100) : 0;
+        const progress = Math.min(Math.round(((c.total_votes || 0) / maxVotes) * 100), 100);
         const rank = i + 1;
         const rankClass = rank <= 3 ? `rank-${rank}` : '';
         const photoUrl = c.photo_url_complete || c.photo_url || `${CONFIG.baseUrl}/uploads/candidats/default.jpg`;
@@ -491,8 +491,7 @@ function setTextContent(id, text) {
 }
 
 function scrollToFilieres() {
-    const el = document.querySelector('.filieres-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    hideFiliere();
 }
 
 function scrollToDonation() {
