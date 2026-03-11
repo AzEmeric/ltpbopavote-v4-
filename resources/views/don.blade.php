@@ -44,7 +44,7 @@
                     <div class="donation-trust">
                         <div class="donation-trust-item">
                             <i class="fas fa-shield-alt"></i>
-                            <span>Securise</span>
+                            <span>Sécurisé</span>
                         </div>
                         <div class="donation-trust-item">
                             <i class="fas fa-mobile-alt"></i>

@@ -60,17 +60,17 @@
             <div class="hero-center">
                 <div class="hero-eyebrow">
                     <span class="eyebrow-line"></span>
-                    Ceremonie de Distinction &middot; Edition Annuelle
+                    Cérémonie de Distinction &middot; Édition Annuelle
                     <span class="eyebrow-line"></span>
                 </div>
                 <h1 class="hero-title">
                     <span class="hero-title-awards">AWARDS</span>
                     <span class="hero-title-school">LTP &middot; BOPA</span>
-                    <span class="hero-title-sub">Lycee Technique & Professionnel de Bopa</span>
+                    <span class="hero-title-sub">Lycée Technique & Professionnel de Bopa</span>
                     <span class="hero-title-year">&middot; 2026 &middot;</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Concours annuel pour distinguer les meilleurs eleves<br class="hide-mobile"> du Lycee Technique et Professionnel de Bopa. Votez et soutenez vos favoris.
+                    Concours annuel pour distinguer les meilleurs élèves<br class="hide-mobile"> du Lycée Technique et Professionnel de Bopa. Votez et soutenez vos favoris.
                 </p>
                 <div class="hero-mobile-nav">
                     <a href="/mes-votes" class="hero-mobile-link">
@@ -107,7 +107,7 @@
                 </div>
                 <div class="hero-info-divider"></div>
                 <div class="hero-info-item">
-                    Filieres <strong>4</strong>
+                    Filières <strong>4</strong>
                 </div>
                 <div class="hero-info-divider"></div>
                 <div class="hero-info-item">
@@ -130,18 +130,18 @@
     <section class="section filieres-section" id="filieres">
         <div class="container">
             <div class="section-header reveal">
-                <span class="badge-label"><i class="fas fa-layer-group"></i> Filieres</span>
-                <h2 class="section-title">&mdash; Filieres en Competition &mdash;</h2>
-                <p class="section-desc">Selectionnez une filiere pour decouvrir les candidats et voter pour votre favori</p>
+                <span class="badge-label"><i class="fas fa-layer-group"></i> Filières</span>
+                <h2 class="section-title">&mdash; Filières en Compétition &mdash;</h2>
+                <p class="section-desc">Sélectionnez une filière pour découvrir les candidats et voter pour votre favori</p>
             </div>
 
             <div class="filieres-grid">
                 @php
                     $filieres = [
-                        ['code' => 'DWM', 'name' => 'Developpement Web & Mobile', 'icon' => 'fa-code',          'desc' => 'Sites web, applications mobiles et solutions digitales'],
-                        ['code' => 'PM',  'name' => 'Producteur Multimedia',       'icon' => 'fa-film',          'desc' => 'Production audiovisuelle, montage et creation de contenu'],
-                        ['code' => 'MMV', 'name' => 'Mode & Vetement',             'icon' => 'fa-scissors',      'desc' => 'Stylisme, couture et design de mode'],
-                        ['code' => 'BTP', 'name' => 'Batiment & Travaux Publics',  'icon' => 'fa-helmet-safety', 'desc' => 'Construction, genie civil et amenagement'],
+                        ['code' => 'DWM', 'name' => 'Développement Web & Mobile', 'icon' => 'fa-code',          'desc' => 'Sites web, applications mobiles et solutions digitales'],
+                        ['code' => 'PM',  'name' => 'Producteur Multimédia',       'icon' => 'fa-film',          'desc' => 'Production audiovisuelle, montage et création de contenu'],
+                        ['code' => 'MMV', 'name' => 'Mode & Vêtement',             'icon' => 'fa-scissors',      'desc' => 'Stylisme, couture et design de mode'],
+                        ['code' => 'BTP', 'name' => 'Bâtiment & Travaux Publics',  'icon' => 'fa-helmet-safety', 'desc' => 'Construction, génie civil et aménagement'],
                     ];
                 @endphp
 
@@ -176,15 +176,15 @@
                 <div class="trust-item">
                     <div class="trust-icon"><i class="fas fa-shield-halved"></i></div>
                     <div>
-                        <strong>100% Securise</strong>
-                        <span>Paiement chiffre et protege</span>
+                        <strong>100% Sécurisé</strong>
+                        <span>Paiement chiffré et protégé</span>
                     </div>
                 </div>
                 <div class="trust-item">
                     <div class="trust-icon"><i class="fas fa-bolt"></i></div>
                     <div>
-                        <strong>Vote instantane</strong>
-                        <span>Confirmation en temps reel</span>
+                        <strong>Vote instantané</strong>
+                        <span>Confirmation en temps réel</span>
                     </div>
                 </div>
             </div>
@@ -197,9 +197,9 @@
             <div class="section-header">
                 <button class="btn-back" onclick="hideFiliere()">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Retour aux filieres</span>
+                    <span>Retour aux filières</span>
                 </button>
-                <span class="badge-label" id="filiereBadge">Filiere</span>
+                <span class="badge-label" id="filiereBadge">Filière</span>
                 <h2 class="section-title" id="filiereTitle">Candidats</h2>
                 <p class="section-desc" id="filiereDesc">Cliquez sur un candidat pour voter</p>
             </div>
@@ -216,9 +216,9 @@
             <div id="noCandidates" class="empty-state" style="display: none;">
                 <div class="empty-icon"><i class="fas fa-user-slash"></i></div>
                 <h3>Aucun candidat</h3>
-                <p>Aucun candidat inscrit dans cette filiere pour le moment.</p>
+                <p>Aucun candidat inscrit dans cette filière pour le moment.</p>
                 <button class="btn-back" onclick="hideFiliere()">
-                    <i class="fas fa-arrow-left"></i> Retour aux filieres
+                    <i class="fas fa-arrow-left"></i> Retour aux filières
                 </button>
             </div>
         </div>
@@ -271,7 +271,7 @@
                 <div class="price-summary">
                     <div class="price-summary-left">
                         <i class="fas fa-shield-alt"></i>
-                        <span><strong id="summaryVotes">1</strong> vote &middot; Paiement securise</span>
+                        <span><strong id="summaryVotes">1</strong> vote &middot; Paiement sécurisé</span>
                     </div>
                     <span class="price-summary-total" id="totalAmount">{{ config('concours.vote_price') }} FCFA</span>
                 </div>
@@ -303,14 +303,14 @@
                             <span class="footer-logo-sub">Awards 2026</span>
                         </div>
                     </div>
-                    <p>Celebrons le talent et l'excellence du Lycee Technique et Professionnel de Bopa, au Benin.</p>
+                    <p>Célébrons le talent et l'excellence du Lycée Technique et Professionnel de Bopa, au Bénin.</p>
                 </div>
                 <div class="footer-links">
                     <h4>Contact</h4>
                     <ul>
                         <li><i class="fas fa-envelope"></i> contact@ltpbopa.bj</li>
                         <li><i class="fas fa-phone"></i> +229 XX XX XX XX</li>
-                        <li><i class="fas fa-location-dot"></i> Bopa, Benin</li>
+                        <li><i class="fas fa-location-dot"></i> Bopa, Bénin</li>
                     </ul>
                 </div>
                 <div class="footer-links">
@@ -324,7 +324,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Lycee Technique et Professionnel de Bopa. Tous droits reserves.</p>
+                <p>&copy; 2026 Lycée Technique et Professionnel de Bopa. Tous droits réservés.</p>
             </div>
         </div>
     </footer>

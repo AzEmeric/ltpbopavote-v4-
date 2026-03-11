@@ -8,7 +8,7 @@
         <div class="container">
             <a href="/" class="donation-back">
                 <i class="fas fa-arrow-left"></i>
-                <span>Retour a l'accueil</span>
+                <span>Retour à l'accueil</span>
             </a>
 
             <div class="lookup-card">
@@ -19,7 +19,7 @@
                     </div>
                     <h1 class="donation-title">Mes votes</h1>
                     <p class="donation-desc">
-                        Verifiez que vos votes ont bien ete comptabilises apres le paiement.
+                        Vérifiez que vos votes ont bien été comptabilisés après le paiement.
                     </p>
 
                     <div class="donation-separator"></div>
@@ -48,8 +48,8 @@
                         <!-- Aucun résultat -->
                         <div id="lookupEmpty" class="lookup-empty" style="display: none;">
                             <i class="fas fa-inbox"></i>
-                            <p>Vous n'avez pas encore vote depuis cet appareil.</p>
-                            <span>Vos votes apparaitront ici automatiquement apres chaque paiement.</span>
+                            <p>Vous n'avez pas encore voté depuis cet appareil.</p>
+                            <span>Vos votes apparaîtront ici automatiquement après chaque paiement.</span>
                             <a href="/" style="display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; color: var(--gold-500); text-decoration: none; font-weight: 600;">
                                 <i class="fas fa-heart"></i> Voter maintenant
                             </a>
@@ -125,11 +125,11 @@
     summaryDiv.innerHTML = `
         <div class="lookup-summary-stat">
             <span class="lookup-summary-value">${totalVotes}</span>
-            <span class="lookup-summary-label">votes confirmes</span>
+            <span class="lookup-summary-label">votes confirmés</span>
         </div>
         <div class="lookup-summary-stat">
             <span class="lookup-summary-value">${totalMontant.toLocaleString('fr-FR')} F</span>
-            <span class="lookup-summary-label">total paye</span>
+            <span class="lookup-summary-label">total payé</span>
         </div>
         ${enAttente.length > 0 ? `
         <div class="lookup-summary-stat lookup-summary-stat--warning">
@@ -141,7 +141,7 @@
     // Liste des votes (du plus récent au plus ancien)
     votesDiv.style.display = 'block';
     votesList.innerHTML = votesData.reverse().map(v => {
-        const statutLabel = { reussi: 'Confirme', en_attente: 'En attente', echoue: 'Echoue', inconnu: 'Inconnu' };
+        const statutLabel = { reussi: 'Confirmé', en_attente: 'En attente', echoue: 'Échoué', inconnu: 'Inconnu' };
         const isReussi = v.statut === 'reussi';
         const totalApres = v.candidat_total_votes || 0;
         const totalAvant = isReussi ? totalApres - v.nombre_votes : totalApres;
@@ -176,7 +176,7 @@
                         <span class="lookup-score-diff">+${v.nombre_votes}</span>
                     </div>
                     <div class="lookup-score lookup-score--after">
-                        <span class="lookup-score-label">Apres</span>
+                        <span class="lookup-score-label">Après</span>
                         <span class="lookup-score-value">${totalApres.toLocaleString('fr-FR')}</span>
                     </div>
                 </div>` : ''}

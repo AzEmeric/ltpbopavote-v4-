@@ -94,11 +94,11 @@ async function showFiliere(filiere) {
     candidatsSection.style.display = 'block';
 
     const filiereNames = {
-        DWM: 'Developpement Web et Mobile',
-        PM:  'Producteur Multimedia',
-        MMV: 'Metier de la Mode et Vetement',
-        BTP: 'Batiment et Travaux Publics',
-        EA:  'Electronique Appliquee'
+        DWM: 'Développement Web et Mobile',
+        PM:  'Producteur Multimédia',
+        MMV: 'Métier de la Mode et Vêtement',
+        BTP: 'Bâtiment et Travaux Publics',
+        EA:  'Électronique Appliquée'
     };
 
     document.getElementById('filiereBadge').textContent = filiere;
@@ -225,7 +225,7 @@ function renderCandidates() {
                 ${c.description ? `<p class="candidate-desc">${escapeHtml(c.description)}</p>` : ''}
                 <div class="vote-progress">
                     <div class="progress-header">
-                        <span>Popularite</span>
+                        <span>Popularité</span>
                         <span class="count">${formatNumber(totalVotes)} vote${totalVotes !== 1 ? 's' : ''}</span>
                     </div>
                     <div class="progress-track">
@@ -358,7 +358,7 @@ function initEventListeners() {
 
 async function processPayment() {
     if (!appState.currentCandidat) {
-        showToast('Aucun candidat selectionne', 'error');
+        showToast('Aucun candidat sélectionné', 'error');
         return;
     }
 
@@ -581,8 +581,8 @@ function showSuccessModal() {
 
     const titre = type === 'don' ? 'Merci pour votre don !' : 'Merci pour votre vote !';
     const texte = type === 'don'
-        ? 'Votre don a bien ete recu. Merci pour votre generosite !'
-        : 'Votre paiement a ete confirme et votre vote a bien ete comptabilise.';
+        ? 'Votre don a bien été reçu. Merci pour votre générosité !'
+        : 'Votre paiement a été confirmé et votre vote a bien été comptabilisé.';
 
     overlay.innerHTML = `
         <div class="success-modal">
@@ -653,15 +653,15 @@ function showFailureModal() {
             <div class="success-modal-icon failure-modal-icon">
                 <i class="fas fa-times"></i>
             </div>
-            <h2 class="success-modal-title">Paiement echoue</h2>
+            <h2 class="success-modal-title">Paiement échoué</h2>
             <p class="success-modal-text">
-                Votre paiement n'a pas abouti. Aucun montant n'a ete debite.
-                Vous pouvez reessayer a tout moment.
+                Votre paiement n'a pas abouti. Aucun montant n'a été débité.
+                Vous pouvez réessayer à tout moment.
             </p>
             ${detailsHtml}
             <button class="success-modal-btn failure-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay'))">
                 <i class="fas fa-redo"></i>
-                <span>Reessayer</span>
+                <span>Réessayer</span>
             </button>
         </div>
     `;
@@ -756,7 +756,7 @@ async function rechercherVotes() {
 
     const telephone = phoneInput.value.replace(/\s/g, '');
     if (telephone.length < 8) {
-        showToast('Veuillez entrer un numero valide', 'error');
+        showToast('Veuillez entrer un numéro valide', 'error');
         phoneInput.focus();
         return;
     }
@@ -801,11 +801,11 @@ async function rechercherVotes() {
             summaryDiv.innerHTML = `
                 <div class="lookup-summary-stat">
                     <span class="lookup-summary-value">${totalVotesConfirmes}</span>
-                    <span class="lookup-summary-label">votes confirmes</span>
+                    <span class="lookup-summary-label">votes confirmés</span>
                 </div>
                 <div class="lookup-summary-stat">
                     <span class="lookup-summary-value">${totalMontant.toLocaleString('fr-FR')} F</span>
-                    <span class="lookup-summary-label">total paye</span>
+                    <span class="lookup-summary-label">total payé</span>
                 </div>
                 ${votesEnAttente > 0 ? `
                 <div class="lookup-summary-stat lookup-summary-stat--warning">
@@ -854,7 +854,7 @@ async function rechercherVotes() {
 
     } catch (err) {
         loadingDiv.style.display = 'none';
-        showToast('Erreur de connexion. Reessayez.', 'error');
+        showToast('Erreur de connexion. Réessayez.', 'error');
         console.error('Erreur recherche:', err);
     }
 }
@@ -867,7 +867,7 @@ function renderVoteItem(v) {
         <div class="lookup-proof">
             <i class="fas fa-check-circle"></i>
             <span>
-                <strong>+${v.nombre_votes}</strong> vote${v.nombre_votes > 1 ? 's' : ''} ajoute${v.nombre_votes > 1 ? 's' : ''} —
+                <strong>+${v.nombre_votes}</strong> vote${v.nombre_votes > 1 ? 's' : ''} ajouté${v.nombre_votes > 1 ? 's' : ''} —
                 ${v.candidat} a maintenant <strong>${v.candidat_total_votes.toLocaleString('fr-FR')}</strong> votes au total
             </span>
         </div>
@@ -876,7 +876,7 @@ function renderVoteItem(v) {
     const reverifierHtml = isEnAttente ? `
         <button class="lookup-reverify" onclick="reverifierVote(${v.id}, this)">
             <i class="fas fa-sync-alt"></i>
-            Reverifier
+            Revérifier
         </button>
     ` : '';
 
@@ -903,7 +903,7 @@ function renderVoteItem(v) {
 
 async function reverifierVote(voteId, btn) {
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verification...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification...';
 
     try {
         // Chercher la transaction liee a ce vote
@@ -916,12 +916,12 @@ async function reverifierVote(voteId, btn) {
             const checkData = await checkResponse.json();
 
             if (checkData.paiement_reussi) {
-                showToast('Paiement confirme ! Vos votes sont comptabilises.', 'success');
+                showToast('Paiement confirmé ! Vos votes sont comptabilisés.', 'success');
             } else {
-                showToast('Le paiement n\'est pas encore confirme. Reessayez dans quelques minutes.', 'info');
+                showToast('Le paiement n\'est pas encore confirmé. Réessayez dans quelques minutes.', 'info');
             }
         } else {
-            showToast('Impossible de verifier ce vote pour le moment.', 'info');
+            showToast('Impossible de vérifier ce vote pour le moment.', 'info');
         }
 
         // Relancer la recherche pour mettre a jour l'affichage
@@ -929,17 +929,17 @@ async function reverifierVote(voteId, btn) {
 
     } catch (err) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Reverifier';
+        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Revérifier';
         showToast('Erreur de connexion.', 'error');
     }
 }
 
 function formatStatut(statut) {
     const labels = {
-        'reussi': 'Confirme',
+        'reussi': 'Confirmé',
         'en_attente': 'En attente',
-        'echoue': 'Echoue',
-        'annule': 'Annule'
+        'echoue': 'Échoué',
+        'annule': 'Annulé'
     };
     return labels[statut] || statut;
 }

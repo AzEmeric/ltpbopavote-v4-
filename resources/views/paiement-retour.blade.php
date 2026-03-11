@@ -10,10 +10,10 @@
         </div>
         <h2 class="paiement-retour-title">Merci !</h2>
         <p class="paiement-retour-text">
-            Verifiez le statut de vos votes sur la page "Mes votes" en utilisant votre numero de telephone.
+            Vérifiez le statut de vos votes sur la page "Mes votes" en utilisant votre numéro de téléphone.
         </p>
         <a href="/" class="paiement-retour-btn">
-            <i class="fas fa-arrow-left"></i> Retour a l'accueil
+            <i class="fas fa-arrow-left"></i> Retour à l'accueil
         </a>
     </div>
 </div>
