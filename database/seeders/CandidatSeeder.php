@@ -75,6 +75,14 @@ class CandidatSeeder extends Seeder
                 'description' => 'Élève en MMV 3 au LTP Bopa, dynamique et passionné par son métier.',
                 'total_votes' => 0,
             ],
+            [
+                'nom' => 'HOUNZAVI',
+                'prenom' => 'Déborah',
+                'filiere' => 'MMV',
+                'photo_url' => '/uploads/candidats/hounzavi_deborah.jpeg',
+                'description' => 'Élève en MMV 3 au LTP Bopa, passionnée par la couture et le stylisme.',
+                'total_votes' => 0,
+            ],
 
             // Filière PM - Plomberie
             [

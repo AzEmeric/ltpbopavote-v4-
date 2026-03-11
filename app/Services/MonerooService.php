@@ -316,40 +316,41 @@ class MonerooService
     {
         $nouveauStatut = Transaction::mapStatutMoneroo($statutMoneroo);
 
-        return DB::transaction(function () use ($transaction, $nouveauStatut, $responseData) {
-            $transaction->update([
-                'statut' => $nouveauStatut,
-                'response_data' => $responseData,
-                'processed_at' => now(),
-            ]);
+        // Pas de DB::transaction() — incompatible avec Neon connection pooler
+        DB::reconnect();
 
-            if ($transaction->type === Transaction::TYPE_VOTE && $transaction->vote_id) {
-                $vote = Vote::find($transaction->vote_id);
-                if ($vote && $vote->statut_paiement === Vote::STATUT_EN_ATTENTE) {
-                    $vote->statut_paiement = $nouveauStatut === Transaction::STATUT_REUSSI
-                        ? Vote::STATUT_REUSSI
-                        : Vote::STATUT_ECHOUE;
-                    $vote->save();
-                }
+        $transaction->update([
+            'statut' => $nouveauStatut,
+            'response_data' => $responseData,
+            'processed_at' => now(),
+        ]);
+
+        if ($transaction->type === Transaction::TYPE_VOTE && $transaction->vote_id) {
+            $vote = Vote::find($transaction->vote_id);
+            if ($vote && $vote->statut_paiement === Vote::STATUT_EN_ATTENTE) {
+                $vote->statut_paiement = $nouveauStatut === Transaction::STATUT_REUSSI
+                    ? Vote::STATUT_REUSSI
+                    : Vote::STATUT_ECHOUE;
+                $vote->save();
             }
+        }
 
-            if ($transaction->type === Transaction::TYPE_DON && $transaction->don_id) {
-                $don = Don::find($transaction->don_id);
-                if ($don && $don->statut === Don::STATUT_EN_ATTENTE) {
-                    $don->statut = $nouveauStatut === Transaction::STATUT_REUSSI
-                        ? Don::STATUT_REUSSI
-                        : Don::STATUT_ECHOUE;
-                    $don->save();
-                }
+        if ($transaction->type === Transaction::TYPE_DON && $transaction->don_id) {
+            $don = Don::find($transaction->don_id);
+            if ($don && $don->statut === Don::STATUT_EN_ATTENTE) {
+                $don->statut = $nouveauStatut === Transaction::STATUT_REUSSI
+                    ? Don::STATUT_REUSSI
+                    : Don::STATUT_ECHOUE;
+                $don->save();
             }
+        }
 
-            Log::info('Paiement Moneroo traité', [
-                'payment_id' => $transaction->deposit_id,
-                'type' => $transaction->type,
-                'statut' => $nouveauStatut,
-            ]);
+        Log::info('Paiement Moneroo traité', [
+            'payment_id' => $transaction->deposit_id,
+            'type' => $transaction->type,
+            'statut' => $nouveauStatut,
+        ]);
 
-            return $nouveauStatut === Transaction::STATUT_REUSSI;
-        });
+        return $nouveauStatut === Transaction::STATUT_REUSSI;
     }
 }

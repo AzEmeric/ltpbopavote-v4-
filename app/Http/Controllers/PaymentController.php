@@ -119,15 +119,13 @@ class PaymentController extends Controller
         }
 
         try {
-            $don = DB::transaction(function () use ($request) {
-                return Don::create([
-                    'telephone' => $request->telephone,
-                    'montant' => $request->montant,
-                    'nom_donateur' => $request->nom_donateur,
-                    'message' => $request->message,
-                    'ip_address' => $request->ip(),
-                ]);
-            });
+            $don = Don::create([
+                'telephone' => $request->telephone,
+                'montant' => $request->montant,
+                'nom_donateur' => $request->nom_donateur,
+                'message' => $request->message,
+                'ip_address' => $request->ip(),
+            ]);
 
             $result = $this->moneroo()->initierPaiementDon($don, $request->telephone ?? null);
 

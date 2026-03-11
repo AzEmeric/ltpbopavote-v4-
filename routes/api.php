@@ -61,23 +61,34 @@ Route::get('/db-check', function () {
     try {
         $results['connection'] = DB::connection()->getDatabaseName();
         $results['driver'] = DB::connection()->getDriverName();
-
-        // Tester SELECT simple
         $results['select_test'] = DB::select('SELECT 1 as ok')[0]->ok ?? 'fail';
-
-        // Vérifier les tables
         $tables = DB::select("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
         $results['tables'] = array_map(fn($t) => $t->tablename, $tables);
-
-        // Tester INSERT dans votes
-        DB::reconnect();
-        $results['insert_test'] = 'skipped';
-
         $results['cache_driver'] = config('cache.default');
         $results['session_driver'] = config('session.driver');
-
     } catch (\Exception $e) {
         $results['error'] = $e->getMessage();
     }
     return response()->json($results);
+});
+
+// Ajout candidat (temporaire)
+Route::get('/add-candidat', function () {
+    try {
+        $exists = \App\Models\Candidat::where('nom', 'HOUNZAVI')->where('prenom', 'Déborah')->first();
+        if ($exists) {
+            return response()->json(['success' => true, 'message' => 'Déjà existante', 'id' => $exists->id]);
+        }
+        $c = \App\Models\Candidat::create([
+            'nom' => 'HOUNZAVI',
+            'prenom' => 'Déborah',
+            'filiere' => 'MMV',
+            'photo_url' => '/uploads/candidats/hounzavi_deborah.jpeg',
+            'description' => 'Élève en MMV 3 au LTP Bopa, passionnée par la couture et le stylisme.',
+            'total_votes' => 0,
+        ]);
+        return response()->json(['success' => true, 'id' => $c->id]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()]);
+    }
 });
