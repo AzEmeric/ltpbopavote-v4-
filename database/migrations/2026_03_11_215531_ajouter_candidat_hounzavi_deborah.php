@@ -5,39 +5,28 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
-        // Vérifier si la candidate n'existe pas déjà
-        $existe = DB::table('candidats')
-            ->where('nom', 'HOUNZAVI')
-            ->where('prenom', 'Déborah')
-            ->exists();
-
-        if (!$existe) {
+        try {
             DB::table('candidats')->insert([
                 'nom' => 'HOUNZAVI',
-                'prenom' => 'Déborah',
+                'prenom' => 'Deborah',
                 'filiere' => 'MMV',
                 'photo_url' => '/uploads/candidats/hounzavi_deborah.jpeg',
-                'description' => 'Élève en MMV 3 au LTP Bopa, passionnée par la couture et le stylisme.',
+                'description' => 'Eleve en MMV 3 au LTP Bopa, passionnee par la couture et le stylisme.',
                 'total_votes' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+        } catch (\Exception $e) {
+            // Ignore si la candidate existe deja
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        DB::table('candidats')
-            ->where('nom', 'HOUNZAVI')
-            ->where('prenom', 'Déborah')
-            ->delete();
+        DB::table('candidats')->where('nom', 'HOUNZAVI')->delete();
     }
 };
