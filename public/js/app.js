@@ -1,5 +1,5 @@
 // ========================================
-// LTP-BOPA VOTE — Concours de l'Excellence 2025
+// LTP-BOPA VOTE — Concours de l'Excellence 2026
 // ========================================
 
 const CONFIG = window.APP_CONFIG;
