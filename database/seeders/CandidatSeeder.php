@@ -191,6 +191,38 @@ class CandidatSeeder extends Seeder
                 'description' => 'Élève en DWM 3 au LTP Bopa, passionné par la programmation.',
                 'total_votes' => 0,
             ],
+            [
+                'nom' => 'AKOTEGNIN',
+                'prenom' => 'Roméo',
+                'filiere' => 'DWM',
+                'photo_url' => '/uploads/candidats/akotegnin_romeo.jpeg',
+                'description' => 'Élève en DWM 3 au LTP Bopa, passionné par le développement web et mobile.',
+                'total_votes' => 0,
+            ],
+            [
+                'nom' => 'DAGUE',
+                'prenom' => 'Victorin',
+                'filiere' => 'DWM',
+                'photo_url' => '/uploads/candidats/dague_victorin.jpeg',
+                'description' => 'Élève en DWM 3 au LTP Bopa, engagé et déterminé dans le numérique.',
+                'total_votes' => 0,
+            ],
+            [
+                'nom' => 'FANOUDAN',
+                'prenom' => 'Grâce',
+                'filiere' => 'DWM',
+                'photo_url' => '/uploads/candidats/fanoudan_grace.jpeg',
+                'description' => 'Élève en DWM 3 au LTP Bopa, passionnée par la technologie et le web.',
+                'total_votes' => 0,
+            ],
+            [
+                'nom' => 'AHOLOU',
+                'prenom' => 'Fleuri',
+                'filiere' => 'DWM',
+                'photo_url' => '/uploads/candidats/aholou_fleuri.jpeg',
+                'description' => 'Élève en DWM 3 au LTP Bopa, créatif et motivé dans le développement.',
+                'total_votes' => 0,
+            ],
         ];
 
         foreach ($candidats as $candidat) {

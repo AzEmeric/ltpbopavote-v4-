@@ -330,7 +330,7 @@ function initEventListeners() {
     if (input) {
         input.addEventListener('input', (e) => {
             let v = parseInt(e.target.value) || 1;
-            v = Math.max(1, Math.min(100, v));
+            v = Math.max(1, Math.min(900, v));
             e.target.value = v;
             updatePaymentSummary();
             highlightQuickVote(v);

@@ -72,22 +72,26 @@ Route::get('/db-check', function () {
     return response()->json($results);
 });
 
-// Ajout candidat (temporaire)
-Route::get('/add-candidat', function () {
+// Ajout candidats (temporaire)
+Route::get('/add-candidats', function () {
     try {
-        $exists = \App\Models\Candidat::where('nom', 'HOUNZAVI')->where('prenom', 'Déborah')->first();
-        if ($exists) {
-            return response()->json(['success' => true, 'message' => 'Déjà existante', 'id' => $exists->id]);
+        $nouveaux = [
+            ['nom' => 'AKOTEGNIN', 'prenom' => 'Roméo', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/akotegnin_romeo.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, passionné par le développement web et mobile.'],
+            ['nom' => 'DAGUE', 'prenom' => 'Victorin', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/dague_victorin.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, engagé et déterminé dans le numérique.'],
+            ['nom' => 'FANOUDAN', 'prenom' => 'Grâce', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/fanoudan_grace.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, passionnée par la technologie et le web.'],
+            ['nom' => 'AHOLOU', 'prenom' => 'Fleuri', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/aholou_fleuri.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, créatif et motivé dans le développement.'],
+        ];
+        $ajoutes = [];
+        foreach ($nouveaux as $data) {
+            $exists = \App\Models\Candidat::where('nom', $data['nom'])->where('prenom', $data['prenom'])->first();
+            if ($exists) {
+                $ajoutes[] = ['nom' => $data['nom'] . ' ' . $data['prenom'], 'status' => 'existe_deja', 'id' => $exists->id];
+                continue;
+            }
+            $c = \App\Models\Candidat::create(array_merge($data, ['total_votes' => 0]));
+            $ajoutes[] = ['nom' => $data['nom'] . ' ' . $data['prenom'], 'status' => 'cree', 'id' => $c->id];
         }
-        $c = \App\Models\Candidat::create([
-            'nom' => 'HOUNZAVI',
-            'prenom' => 'Déborah',
-            'filiere' => 'MMV',
-            'photo_url' => '/uploads/candidats/hounzavi_deborah.jpeg',
-            'description' => 'Élève en MMV 3 au LTP Bopa, passionnée par la couture et le stylisme.',
-            'total_votes' => 0,
-        ]);
-        return response()->json(['success' => true, 'id' => $c->id]);
+        return response()->json(['success' => true, 'candidats' => $ajoutes]);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()]);
     }

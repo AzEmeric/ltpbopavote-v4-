@@ -35,7 +35,7 @@ return [
     */
 
     // Nombre maximum de votes par transaction
-    'max_votes_per_transaction' => 100,
+    'max_votes_per_transaction' => 900,
 
     // Nombre minimum de votes par transaction
     'min_votes_per_transaction' => 1,

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Concours de l\'Excellence 2025 — LTP Bopa')
+@section('title', 'Awards 2026 — LTP Bopa')
 
 @section('content')
 
@@ -11,7 +11,7 @@
                 <div class="sticky-logo-icon"><i class="fas fa-trophy"></i></div>
                 <div class="logo-text">
                     <span class="logo-name">LTP Bopa</span>
-                    <span class="logo-sub">Excellence 2025</span>
+                    <span class="logo-sub">Awards 2026</span>
                 </div>
             </a>
             <div class="sticky-right">
@@ -42,7 +42,7 @@
                     <div class="logo-icon"><i class="fas fa-trophy"></i></div>
                     <div class="logo-text">
                         <span class="logo-name">LTP Bopa</span>
-                        <span class="logo-sub">Excellence 2025</span>
+                        <span class="logo-sub">Awards 2026</span>
                     </div>
                 </a>
                 <div class="hero-top-right">
@@ -60,15 +60,17 @@
             <div class="hero-center">
                 <div class="hero-eyebrow">
                     <span class="eyebrow-line"></span>
-                    Lycee Technique et Professionnel de Bopa
+                    Ceremonie de Distinction &middot; Edition Annuelle
                     <span class="eyebrow-line"></span>
                 </div>
                 <h1 class="hero-title">
-                    Concours de<br>
-                    <span class="gold-text">l'Excellence</span> 2025
+                    <span class="hero-title-awards">AWARDS</span>
+                    <span class="hero-title-school">LTP &middot; BOPA</span>
+                    <span class="hero-title-sub">Lycee Technique & Professionnel de Bopa</span>
+                    <span class="hero-title-year">&middot; 2026 &middot;</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Votez et faites des dons pour soutenir vos candidats favoris<br class="hide-mobile"> aux Awards LTPBOPA. 100 FCFA = 1 vote. Chaque geste compte.
+                    Concours annuel pour distinguer les meilleurs eleves<br class="hide-mobile"> du Lycee Technique et Professionnel de Bopa. Votez et soutenez vos favoris.
                 </p>
                 <div class="hero-mobile-nav">
                     <a href="/mes-votes" class="hero-mobile-link">
@@ -95,6 +97,24 @@
                 </div>
             </div>
 
+            <div class="hero-info-bar">
+                <div class="hero-info-item">
+                    Edition <strong>2026</strong>
+                </div>
+                <div class="hero-info-divider"></div>
+                <div class="hero-info-item">
+                    Organisateur <strong>LTP&middot;BOPA</strong>
+                </div>
+                <div class="hero-info-divider"></div>
+                <div class="hero-info-item">
+                    Filieres <strong>4</strong>
+                </div>
+                <div class="hero-info-divider"></div>
+                <div class="hero-info-item">
+                    Participants <strong>Tous niveaux</strong>
+                </div>
+            </div>
+
         </div>
         <div class="hero-scroll-indicator" onclick="scrollToFilieres()">
             <div class="scroll-mouse">
@@ -103,12 +123,15 @@
         </div>
     </header>
 
+    <!-- Separator -->
+    <div class="gold-separator">&#9670;</div>
+
     <!-- Filieres -->
     <section class="section filieres-section" id="filieres">
         <div class="container">
             <div class="section-header reveal">
                 <span class="badge-label"><i class="fas fa-layer-group"></i> Filieres</span>
-                <h2 class="section-title">Choisissez une filiere</h2>
+                <h2 class="section-title">&mdash; Filieres en Competition &mdash;</h2>
                 <p class="section-desc">Selectionnez une filiere pour decouvrir les candidats et voter pour votre favori</p>
             </div>
 
@@ -229,7 +252,7 @@
                             <button class="stepper-btn" onclick="decrementVotes()" aria-label="Moins">
                                 <i class="fas fa-minus"></i>
                             </button>
-                            <input type="number" class="stepper-input" id="nombreVotes" value="1" min="1" max="100">
+                            <input type="number" class="stepper-input" id="nombreVotes" value="1" min="1" max="900">
                             <button class="stepper-btn" onclick="incrementVotes()" aria-label="Plus">
                                 <i class="fas fa-plus"></i>
                             </button>
@@ -277,7 +300,7 @@
                         <div class="footer-logo-icon"><i class="fas fa-trophy"></i></div>
                         <div>
                             <span class="footer-logo-name">LTP Bopa</span>
-                            <span class="footer-logo-sub">Concours de l'Excellence</span>
+                            <span class="footer-logo-sub">Awards 2026</span>
                         </div>
                     </div>
                     <p>Celebrons le talent et l'excellence du Lycee Technique et Professionnel de Bopa, au Benin.</p>
@@ -301,7 +324,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Lycee Technique et Professionnel de Bopa. Tous droits reserves.</p>
+                <p>&copy; 2026 Lycee Technique et Professionnel de Bopa. Tous droits reserves.</p>
             </div>
         </div>
     </footer>
