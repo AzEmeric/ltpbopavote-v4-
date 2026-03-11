@@ -72,6 +72,23 @@ Route::get('/db-check', function () {
     return response()->json($results);
 });
 
+// Reset votes (temporaire) — supprime votes, transactions, dons + remet compteurs à 0
+Route::get('/reset-votes', function () {
+    try {
+        \Illuminate\Support\Facades\DB::table('transactions')->delete();
+        \Illuminate\Support\Facades\DB::table('votes')->delete();
+        \Illuminate\Support\Facades\DB::table('dons')->delete();
+        \App\Models\Candidat::query()->update(['total_votes' => 0]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tous les votes, transactions et dons ont été supprimés. Compteurs remis à zéro.',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()]);
+    }
+});
+
 // Ajout candidats (temporaire)
 Route::get('/add-candidats', function () {
     try {
