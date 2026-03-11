@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\CandidatController;
 use App\Http\Controllers\VoteController;
 use App\Http\Controllers\PaymentController;
@@ -52,4 +53,31 @@ Route::get('/ping', function () {
         'message' => 'API fonctionnelle',
         'timestamp' => now()->toDateTimeString(),
     ]);
+});
+
+// Diagnostic DB (temporaire)
+Route::get('/db-check', function () {
+    $results = [];
+    try {
+        $results['connection'] = DB::connection()->getDatabaseName();
+        $results['driver'] = DB::connection()->getDriverName();
+
+        // Tester SELECT simple
+        $results['select_test'] = DB::select('SELECT 1 as ok')[0]->ok ?? 'fail';
+
+        // Vérifier les tables
+        $tables = DB::select("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+        $results['tables'] = array_map(fn($t) => $t->tablename, $tables);
+
+        // Tester INSERT dans votes
+        DB::reconnect();
+        $results['insert_test'] = 'skipped';
+
+        $results['cache_driver'] = config('cache.default');
+        $results['session_driver'] = config('session.driver');
+
+    } catch (\Exception $e) {
+        $results['error'] = $e->getMessage();
+    }
+    return response()->json($results);
 });

@@ -33,7 +33,8 @@ class VoteController extends Controller
         }
 
         try {
-            DB::beginTransaction();
+            // Reset connexion pour éviter les transactions zombies (Neon pooler)
+            DB::reconnect();
 
             // Vérifier que le candidat existe
             $candidat = Candidat::findOrFail($request->candidat_id);
@@ -51,8 +52,6 @@ class VoteController extends Controller
                 'statut_paiement' => Vote::STATUT_EN_ATTENTE,
                 'ip_address' => $request->ip(),
             ]);
-
-            DB::commit();
 
             // Log de l'opération
             Log::info('Vote créé', [
@@ -74,15 +73,12 @@ class VoteController extends Controller
             ], 201);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Candidat introuvable',
             ], 404);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            
             Log::error('Erreur création vote', [
                 'error' => $e->getMessage(),
                 'data' => $request->all(),
