@@ -257,6 +257,25 @@ class MonerooService
      */
     public function rechercherParTelephone(string $telephone): array
     {
+        // Vérifier les votes en attente auprès de l'API avant de retourner les résultats
+        $votesEnAttente = Vote::where('telephone', $telephone)
+            ->where('statut_paiement', Vote::STATUT_EN_ATTENTE)
+            ->with('transaction')
+            ->get();
+
+        foreach ($votesEnAttente as $vote) {
+            if ($vote->transaction && $vote->transaction->deposit_id) {
+                try {
+                    $this->verifierPaiement($vote->transaction->deposit_id);
+                } catch (\Exception $e) {
+                    Log::warning('Erreur vérification vote en attente', [
+                        'vote_id' => $vote->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
         $votes = Vote::where('telephone', $telephone)
             ->with('candidat')
             ->latest()

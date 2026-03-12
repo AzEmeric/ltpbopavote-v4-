@@ -235,6 +235,13 @@
 
             <div id="candidatesGrid" class="candidates-grid"></div>
 
+            <div class="candidates-bottom-nav" id="candidatesBottomNav" style="display: none;">
+                <button class="btn-back-bottom" onclick="hideFiliere()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Retour aux filières</span>
+                </button>
+            </div>
+
             <div id="noCandidates" class="empty-state" style="display: none;">
                 <div class="empty-icon"><i class="fas fa-user-slash"></i></div>
                 <h3>Aucun candidat</h3>
@@ -348,7 +355,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Lycée Technique et Professionnel de Bopa. Tous droits réservés.</p>
+                <p>&copy; 2026 LTPBOPA/DWM. TOUS DROITS RÉSERVÉS.</p>
             </div>
         </div>
     </footer>

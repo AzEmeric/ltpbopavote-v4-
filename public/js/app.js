@@ -212,14 +212,18 @@ function renderCandidates() {
 
     const candidats = appState.candidatsParFiliere[appState.currentFiliere] || [];
 
+    const bottomNav = document.getElementById('candidatesBottomNav');
+
     if (candidats.length === 0) {
         gridEl.style.display = 'none';
         emptyEl.style.display = 'block';
+        if (bottomNav) bottomNav.style.display = 'none';
         return;
     }
 
     emptyEl.style.display = 'none';
     gridEl.style.display = 'grid';
+    if (bottomNav) bottomNav.style.display = 'flex';
 
     // Progress bar max reference (2000 votes = 100%)
     const maxVotes = 2000;
@@ -625,9 +629,9 @@ function showSuccessModal() {
             <h2 class="success-modal-title">${titre}</h2>
             <p class="success-modal-text">${texte}</p>
             ${detailsHtml}
-            <button class="success-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay'))">
-                <i class="fas fa-thumbs-up"></i>
-                <span>Super !</span>
+            <button class="success-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay')); scrollToFilieres();">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour aux filières</span>
             </button>
         </div>
     `;
@@ -644,6 +648,13 @@ function closeSuccessModal(overlay) {
     overlay.classList.remove('active');
     document.body.style.overflow = '';
     setTimeout(() => overlay.remove(), 300);
+}
+
+function scrollToFilieres() {
+    const candidatsSection = document.getElementById('candidats');
+    if (candidatsSection) candidatsSection.style.display = 'none';
+    const filieresSection = document.getElementById('filieres');
+    if (filieresSection) filieresSection.scrollIntoView({ behavior: 'smooth' });
 }
 
 // ========================================
@@ -688,9 +699,9 @@ function showFailureModal() {
                 Vous pouvez réessayer à tout moment.
             </p>
             ${detailsHtml}
-            <button class="success-modal-btn failure-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay'))">
-                <i class="fas fa-redo"></i>
-                <span>Réessayer</span>
+            <button class="success-modal-btn failure-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay')); scrollToFilieres();">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour aux filières</span>
             </button>
         </div>
     `;
