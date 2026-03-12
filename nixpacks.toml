@@ -8,7 +8,7 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "php artisan config:cache || true"
+    "echo 'Build done'"
 ]
 
 [start]
