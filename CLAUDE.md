@@ -191,7 +191,7 @@ GET    /api/ping                               # Health check
 - Termes du domaine : candidat, filière, vote, reussi, echoue, en_attente
 
 ### Filières
-- **DWM** (Développement Web et Mobile), **PM** (Plomberie), **MMV** (Menuiserie Métallique et Vitrerie), **BTP** (Bâtiment et Travaux Publics), **EA** (Électricité Automobile)
+- **DWM** (Développement Web et Mobile), **PM** (Producteur Multimédia), **MMV** (Menuiserie Métallique et Vitrerie), **BTP** (Bâtiment et Travaux Publics), **EA** (Électricité Automobile)
 
 ### Code PHP / Laravel — Bonnes pratiques
 

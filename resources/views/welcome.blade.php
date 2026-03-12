@@ -8,7 +8,7 @@
     <nav class="sticky-nav" id="stickyNav">
         <div class="container sticky-nav-inner">
             <a href="#" class="sticky-logo" onclick="window.scrollTo({top:0,behavior:'smooth'});return false">
-                <div class="sticky-logo-icon"><i class="fas fa-trophy"></i></div>
+                <img src="/images/logo-ltp-bopa.png" alt="Logo LTP Bopa" class="sticky-logo-img">
                 <div class="logo-text">
                     <span class="logo-name">LTP Bopa</span>
                     <span class="logo-sub">Awards 2026</span>
@@ -54,7 +54,7 @@
         <div class="container hero-container">
             <div class="hero-top">
                 <a href="#" class="logo">
-                    <div class="logo-icon"><i class="fas fa-trophy"></i></div>
+                    <img src="/images/logo-ltp-bopa.png" alt="Logo LTP Bopa" class="logo-img">
                     <div class="logo-text">
                         <span class="logo-name">LTP Bopa</span>
                         <span class="logo-sub">Awards 2026</span>
@@ -319,7 +319,7 @@
             <div class="footer-top">
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <div class="footer-logo-icon"><i class="fas fa-trophy"></i></div>
+                        <img src="/images/logo-ltp-bopa.png" alt="Logo LTP Bopa" class="footer-logo-img">
                         <div>
                             <span class="footer-logo-name">LTP Bopa</span>
                             <span class="footer-logo-sub">Awards 2026</span>

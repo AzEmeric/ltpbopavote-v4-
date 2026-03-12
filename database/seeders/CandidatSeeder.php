@@ -84,13 +84,13 @@ class CandidatSeeder extends Seeder
                 'total_votes' => 0,
             ],
 
-            // Filière PM - Plomberie
+            // Filière PM - Production Multimédia
             [
                 'nom' => 'GNONLONFOUN',
                 'prenom' => 'Eloide',
                 'filiere' => 'PM',
                 'photo_url' => '/uploads/candidats/gnonlonfoun_eloide.jpeg',
-                'description' => 'Élève en PM1 au LTP Bopa, passionnée par la photographie et la plomberie.',
+                'description' => 'Élève en PM1 au LTP Bopa, passionnée par la photographie et le multimédia.',
                 'total_votes' => 0,
             ],
             [
@@ -138,7 +138,7 @@ class CandidatSeeder extends Seeder
                 'prenom' => 'Francklin',
                 'filiere' => 'PM',
                 'photo_url' => '/uploads/candidats/bocco_francklin.jpeg',
-                'description' => 'Élève en PM1 au LTP Bopa, passionné par la photographie et la plomberie.',
+                'description' => 'Élève en PM1 au LTP Bopa, passionné par la photographie et le multimédia.',
                 'total_votes' => 0,
             ],
             [

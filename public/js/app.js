@@ -221,8 +221,8 @@ function renderCandidates() {
     emptyEl.style.display = 'none';
     gridEl.style.display = 'grid';
 
-    // Progress bar max reference (700 votes = 100%)
-    const maxVotes = 700;
+    // Progress bar max reference (2000 votes = 100%)
+    const maxVotes = 2000;
 
     gridEl.innerHTML = candidats.map((c, i) => {
         const progress = Math.min(Math.round(((c.total_votes || 0) / maxVotes) * 100), 100);
