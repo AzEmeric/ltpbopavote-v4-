@@ -8,7 +8,7 @@
     <nav class="sticky-nav" id="stickyNav">
         <div class="container sticky-nav-inner">
             <a href="#" class="sticky-logo" onclick="window.scrollTo({top:0,behavior:'smooth'});return false">
-                <div class="sticky-logo-icon"><i class="fas fa-trophy"></i></div>
+                <img src="/images/logo-ltp-bopa.png" alt="Logo LTP Bopa" class="sticky-logo-img">
                 <div class="logo-text">
                     <span class="logo-name">LTP Bopa</span>
                     <span class="logo-sub">Awards 2026</span>
@@ -54,7 +54,7 @@
         <div class="container hero-container">
             <div class="hero-top">
                 <a href="#" class="logo">
-                    <div class="logo-icon"><i class="fas fa-trophy"></i></div>
+                    <img src="/images/logo-ltp-bopa.png" alt="Logo LTP Bopa" class="logo-img">
                     <div class="logo-text">
                         <span class="logo-name">LTP Bopa</span>
                         <span class="logo-sub">Awards 2026</span>
@@ -235,6 +235,13 @@
 
             <div id="candidatesGrid" class="candidates-grid"></div>
 
+            <div class="candidates-bottom-nav" id="candidatesBottomNav" style="display: none;">
+                <button class="btn-back-bottom" onclick="hideFiliere()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Retour aux filières</span>
+                </button>
+            </div>
+
             <div id="noCandidates" class="empty-state" style="display: none;">
                 <div class="empty-icon"><i class="fas fa-user-slash"></i></div>
                 <h3>Aucun candidat</h3>
@@ -319,7 +326,7 @@
             <div class="footer-top">
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <div class="footer-logo-icon"><i class="fas fa-trophy"></i></div>
+                        <img src="/images/logo-ltp-bopa.png" alt="Logo LTP Bopa" class="footer-logo-img">
                         <div>
                             <span class="footer-logo-name">LTP Bopa</span>
                             <span class="footer-logo-sub">Awards 2026</span>
@@ -348,7 +355,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Lycée Technique et Professionnel de Bopa. Tous droits réservés.</p>
+                <p>&copy; 2026 LTPBOPA/DWM. TOUS DROITS RÉSERVÉS.</p>
             </div>
         </div>
     </footer>

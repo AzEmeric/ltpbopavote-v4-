@@ -93,7 +93,7 @@ Route::get('/reset-votes', function () {
 Route::get('/add-candidats', function () {
     try {
         $nouveaux = [
-            ['nom' => 'AKOTEGNIN', 'prenom' => 'Roméo', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/akotegnin_romeo.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, passionné par le développement web et mobile.'],
+            ['nom' => 'AKOTANGNI', 'prenom' => 'Roméo', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/akotegnin_romeo.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, passionné par le développement web et mobile.'],
             ['nom' => 'DAGUE', 'prenom' => 'Victorin', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/dague_victorin.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, engagé et déterminé dans le numérique.'],
             ['nom' => 'FANOUDAN', 'prenom' => 'Grâce', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/fanoudan_grace.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, passionnée par la technologie et le web.'],
             ['nom' => 'AHOLOU', 'prenom' => 'Fleuri', 'filiere' => 'DWM', 'photo_url' => '/uploads/candidats/aholou_fleuri.jpeg', 'description' => 'Élève en DWM 3 au LTP Bopa, créatif et motivé dans le développement.'],
