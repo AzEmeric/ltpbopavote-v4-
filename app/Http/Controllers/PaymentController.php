@@ -305,6 +305,11 @@ class PaymentController extends Controller
                 $vote->statut_paiement = $statut === 'reussi' ? Vote::STATUT_REUSSI : Vote::STATUT_ECHOUE;
                 $vote->save();
 
+                // Incrémenter les votes du candidat si paiement réussi
+                if ($statut === 'reussi' && $vote->candidat) {
+                    $vote->candidat->incrementVotes($vote->nombre_votes);
+                }
+
                 Transaction::create([
                     'vote_id' => $vote->id,
                     'deposit_id' => 'SIM-' . uniqid(),

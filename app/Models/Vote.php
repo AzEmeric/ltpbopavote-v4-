@@ -168,11 +168,9 @@ class Vote extends Model
             }
         });
 
-        // Après la mise à jour vers "réussi", incrémenter les votes du candidat
-        static::updated(function ($vote) {
-            if ($vote->wasChanged('statut_paiement') && $vote->statut_paiement === self::STATUT_REUSSI) {
-                $vote->candidat->incrementVotes($vote->nombre_votes);
-            }
-        });
+        // Note : L'incrémentation des votes du candidat est gérée explicitement
+        // dans MonerooService::traiterStatut() pour garantir la fiabilité.
+        // Ne pas utiliser de model event ici car si l'increment échoue après
+        // que le statut soit déjà persisté, les votes sont perdus sans recours.
     }
 }

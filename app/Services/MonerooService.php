@@ -316,26 +316,62 @@ class MonerooService
     {
         $nouveauStatut = Transaction::mapStatutMoneroo($statutMoneroo);
 
-        // Pas de DB::transaction() — incompatible avec Neon connection pooler
-        DB::reconnect();
+        // Reconnexion préventive (Neon connection pooler)
+        try {
+            DB::reconnect();
+        } catch (\Exception $e) {
+            Log::warning('DB::reconnect() échoué, on continue', ['error' => $e->getMessage()]);
+        }
 
+        // Sauvegarder les données de réponse sur la transaction (sans changer le statut encore)
         $transaction->update([
-            'statut' => $nouveauStatut,
             'response_data' => $responseData,
-            'processed_at' => now(),
         ]);
 
         if ($transaction->type === Transaction::TYPE_VOTE && $transaction->vote_id) {
             $vote = Vote::find($transaction->vote_id);
             if ($vote && $vote->statut_paiement === Vote::STATUT_EN_ATTENTE) {
-                $vote->statut_paiement = $nouveauStatut === Transaction::STATUT_REUSSI
-                    ? Vote::STATUT_REUSSI
-                    : Vote::STATUT_ECHOUE;
-                $vote->save();
-            }
-        }
+                $paiementReussi = $nouveauStatut === Transaction::STATUT_REUSSI;
 
-        if ($transaction->type === Transaction::TYPE_DON && $transaction->don_id) {
+                if ($paiementReussi) {
+                    // 1. Incrémenter les votes du candidat EN PREMIER
+                    try {
+                        $candidat = $vote->candidat;
+                        if ($candidat) {
+                            $candidat->incrementVotes($vote->nombre_votes);
+                        }
+                    } catch (\Exception $e) {
+                        // L'incrément a échoué : ne pas marquer le vote/transaction
+                        // comme réussi. La réconciliation retentera dans 30s.
+                        Log::error('Échec incrémentation votes — transaction reste en attente', [
+                            'vote_id' => $vote->id,
+                            'candidat_id' => $vote->candidat_id,
+                            'error' => $e->getMessage(),
+                        ]);
+                        return false;
+                    }
+
+                    // 2. Seulement après succès de l'incrément, marquer le vote et la transaction
+                    $vote->statut_paiement = Vote::STATUT_REUSSI;
+                    $vote->saveQuietly();
+                    $transaction->update(['statut' => $nouveauStatut, 'processed_at' => now()]);
+
+                    Log::info('Votes incrémentés et vote confirmé', [
+                        'vote_id' => $vote->id,
+                        'candidat_id' => $vote->candidat_id,
+                        'nombre_votes' => $vote->nombre_votes,
+                    ]);
+                } else {
+                    // Paiement échoué : marquer directement
+                    $vote->statut_paiement = Vote::STATUT_ECHOUE;
+                    $vote->saveQuietly();
+                    $transaction->update(['statut' => $nouveauStatut, 'processed_at' => now()]);
+                }
+            } else {
+                // Vote déjà traité, juste mettre à jour la transaction
+                $transaction->update(['statut' => $nouveauStatut, 'processed_at' => now()]);
+            }
+        } elseif ($transaction->type === Transaction::TYPE_DON && $transaction->don_id) {
             $don = Don::find($transaction->don_id);
             if ($don && $don->statut === Don::STATUT_EN_ATTENTE) {
                 $don->statut = $nouveauStatut === Transaction::STATUT_REUSSI
@@ -343,6 +379,9 @@ class MonerooService
                     : Don::STATUT_ECHOUE;
                 $don->save();
             }
+            $transaction->update(['statut' => $nouveauStatut, 'processed_at' => now()]);
+        } else {
+            $transaction->update(['statut' => $nouveauStatut, 'processed_at' => now()]);
         }
 
         Log::info('Paiement Moneroo traité', [
