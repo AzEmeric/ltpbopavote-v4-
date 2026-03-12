@@ -9,4 +9,4 @@ use Illuminate\Support\Facades\Schedule;
 */
 
 // Réconciliation des paiements Moneroo toutes les 5 minutes
-Schedule::command('paiements:reconcilier')->everyFiveMinutes();
+Schedule::command('paiements:reconcilier')->everyThirtySeconds();

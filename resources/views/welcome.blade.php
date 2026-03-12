@@ -15,13 +15,28 @@
                 </div>
             </a>
             <div class="sticky-right">
-                <a href="/mes-votes" class="chip">
+                <a href="/mes-votes" class="chip nav-chip-desktop">
                     <i class="fas fa-search"></i>
                     <span>Mes votes</span>
                 </a>
-                <a href="/don" class="chip chip--cta">
+                <a href="/don" class="chip chip--cta nav-chip-desktop">
                     <i class="fas fa-hand-holding-heart"></i>
                     <span>Faire un don</span>
+                </a>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Changer le thème">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="hamburger" onclick="toggleMobileMenu(this)" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+            <div class="mobile-menu">
+                <a href="/mes-votes" class="mobile-menu-link">
+                    <i class="fas fa-search"></i> Mes votes
+                </a>
+                <a href="/don" class="mobile-menu-link">
+                    <i class="fas fa-hand-holding-heart"></i> Faire un don
                 </a>
             </div>
         </div>
@@ -46,13 +61,28 @@
                     </div>
                 </a>
                 <div class="hero-top-right">
-                    <a href="/mes-votes" class="chip">
+                    <a href="/mes-votes" class="chip nav-chip-desktop">
                         <i class="fas fa-search"></i>
                         <span>Mes votes</span>
                     </a>
-                    <a href="/don" class="chip chip--cta">
+                    <a href="/don" class="chip chip--cta nav-chip-desktop">
                         <i class="fas fa-hand-holding-heart"></i>
                         <span>Faire un don</span>
+                    </a>
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Changer le thème">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun"></i>
+                    </button>
+                    <button class="hamburger" onclick="toggleMobileMenu(this)" aria-label="Menu">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
+                <div class="mobile-menu">
+                    <a href="/mes-votes" class="mobile-menu-link">
+                        <i class="fas fa-search"></i> Mes votes
+                    </a>
+                    <a href="/don" class="mobile-menu-link">
+                        <i class="fas fa-hand-holding-heart"></i> Faire un don
                     </a>
                 </div>
             </div>
@@ -72,18 +102,10 @@
                 <p class="hero-subtitle">
                     Concours annuel pour distinguer les meilleurs élèves<br class="hide-mobile"> du Lycée Technique et Professionnel de Bopa. Votez et soutenez vos favoris.
                 </p>
-                <div class="hero-mobile-nav">
-                    <a href="/mes-votes" class="hero-mobile-link">
-                        <i class="fas fa-search"></i> Mes votes
-                    </a>
-                    <a href="/don" class="hero-mobile-link hero-mobile-link--cta">
-                        <i class="fas fa-hand-holding-heart"></i> Faire un don
-                    </a>
-                </div>
                 <div class="hero-actions">
                     <button class="btn-hero" onclick="scrollToFilieres()">
                         <i class="fas fa-heart"></i>
-                        <span>Soutenir un candidat</span>
+                        <span>Voter pour un candidat</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <a href="/don" class="btn-hero-outline">
