@@ -18,7 +18,7 @@
                             <i class="fas fa-hand-holding-heart"></i>
                         </div>
                         <h1 class="donation-title">Faire un don</h1>
-                        <p class="donation-desc">Votre don contribue à l'organisation de la journée culturelle du LTP Bopa : spectacles, expositions, compétitions entre filières et mise en valeur du talent de nos apprenants. Chaque contribution, même modeste, fait la différence !</p>
+                        <p class="donation-desc">Votre don finance les prix des compétitions entre filières lors de la journée culturelle du LTP Bopa. Récompensez le talent et l'effort de nos apprenants. Chaque contribution compte !</p>
                     </div>
 
                     <!-- Montant -->
