@@ -230,7 +230,7 @@ class CandidatSeeder extends Seeder
                 'prenom' => 'Janvier',
                 'filiere' => 'TEA',
                 'photo_url' => '/uploads/candidats/akakpo_janvier.jpeg',
-                'description' => 'Élève en TEA3 au LTP Bopa, passionné par l\'électricité automobile.',
+                'description' => 'Élève en TEA3 au LTP Bopa, passionné par l\'électronique appliquée.',
                 'total_votes' => 0,
             ],
             [
