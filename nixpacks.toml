@@ -3,12 +3,13 @@ nixPkgs = ["php84", "php84Extensions.pdo", "php84Extensions.pdo_pgsql", "php84Ex
 
 [phases.install]
 cmds = [
+    "npm ci || npm install",
     "composer install --no-dev --optimize-autoloader --no-interaction"
 ]
 
 [phases.build]
 cmds = [
-    "php artisan config:cache || true"
+    "npm run production"
 ]
 
 [start]
