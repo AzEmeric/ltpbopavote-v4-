@@ -545,6 +545,8 @@ function setTextContent(id, text) {
 
 function scrollToFilieres() {
     hideFiliere();
+    const filieresSection = document.getElementById('filieres');
+    if (filieresSection) filieresSection.scrollIntoView({ behavior: 'smooth' });
 }
 
 function returnToCurrentFiliere() {
@@ -669,12 +671,6 @@ function closeSuccessModal(overlay) {
     setTimeout(() => overlay.remove(), 300);
 }
 
-function scrollToFilieres() {
-    const candidatsSection = document.getElementById('candidats');
-    if (candidatsSection) candidatsSection.style.display = 'none';
-    const filieresSection = document.getElementById('filieres');
-    if (filieresSection) filieresSection.scrollIntoView({ behavior: 'smooth' });
-}
 
 // ========================================
 // MODAL ECHEC PAIEMENT
