@@ -224,11 +224,11 @@ class CandidatSeeder extends Seeder
                 'total_votes' => 0,
             ],
 
-            // Nouveaux candidats — EA (Électricité Automobile)
+            // Filière TEA - Technicien en Électronique Appliquée
             [
                 'nom' => 'AKAKPO',
                 'prenom' => 'Janvier',
-                'filiere' => 'EA',
+                'filiere' => 'TEA',
                 'photo_url' => '/uploads/candidats/akakpo_janvier.jpeg',
                 'description' => 'Élève en TEA3 au LTP Bopa, passionné par l\'électricité automobile.',
                 'total_votes' => 0,
@@ -236,7 +236,7 @@ class CandidatSeeder extends Seeder
             [
                 'nom' => 'NOUDEHOU',
                 'prenom' => 'Roger',
-                'filiere' => 'EA',
+                'filiere' => 'TEA',
                 'photo_url' => '/uploads/candidats/noudehou_roger.jpeg',
                 'description' => 'Élève en TEA3 au LTP Bopa, curieux et déterminé dans son apprentissage.',
                 'total_votes' => 0,
@@ -244,7 +244,7 @@ class CandidatSeeder extends Seeder
             [
                 'nom' => 'AZONYITO',
                 'prenom' => 'Romaric',
-                'filiere' => 'EA',
+                'filiere' => 'TEA',
                 'photo_url' => '/uploads/candidats/azonyito_romaric.jpeg',
                 'description' => 'Élève en TEA3 au LTP Bopa, engagé et passionné par son métier.',
                 'total_votes' => 0,
@@ -252,7 +252,7 @@ class CandidatSeeder extends Seeder
             [
                 'nom' => 'ADOUKONOU',
                 'prenom' => 'Alexandre',
-                'filiere' => 'EA',
+                'filiere' => 'TEA',
                 'photo_url' => '/uploads/candidats/adoukonou_alexandre.jpeg',
                 'description' => 'Élève en TEA3 au LTP Bopa, ambitieux et travailleur.',
                 'total_votes' => 0,
@@ -260,7 +260,7 @@ class CandidatSeeder extends Seeder
             [
                 'nom' => 'SOSSOU',
                 'prenom' => 'Seth',
-                'filiere' => 'EA',
+                'filiere' => 'TEA',
                 'photo_url' => '/uploads/candidats/sossou_seth.jpeg',
                 'description' => 'Élève en TEA3 au LTP Bopa, souriant et déterminé à exceller.',
                 'total_votes' => 0,

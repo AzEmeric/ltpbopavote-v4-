@@ -39,7 +39,7 @@ let appState = {
     nombreVotes: 1,
     isLoading: false,
     currentFiliere: null,
-    candidatsParFiliere: { DWM: [], PM: [], MMV: [], BTP: [], EA: [] }
+    candidatsParFiliere: { DWM: [], PM: [], MMV: [], BTP: [], TEA: [] }
 };
 
 // ========================================
@@ -47,10 +47,10 @@ let appState = {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadCandidates();
     initEventListeners();
     initStickyNav();
     initRevealObserver();
+    await loadCandidates();
 
     // Retour après paiement Moneroo : ouvrir la filière du candidat voté
     const params = new URLSearchParams(window.location.search);
@@ -127,7 +127,7 @@ async function showFiliere(filiere) {
         PM:  'Producteur Multimédia',
         MMV: 'Métier de la Mode et Vêtement',
         BTP: 'Bâtiment et Travaux Publics',
-        EA:  'Électronique Appliquée'
+        TEA: 'Technicien en Électronique Appliquée'
     };
 
     document.getElementById('filiereBadge').textContent = filiere;
@@ -166,6 +166,12 @@ function hideFiliere() {
 // ========================================
 
 async function loadCandidates() {
+    // Afficher les spinners sur les compteurs pendant le chargement
+    ['DWM', 'PM', 'MMV', 'BTP', 'TEA'].forEach(f => {
+        const el = document.getElementById(`count-${f}`);
+        if (el) el.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:.75em;opacity:.5"></i>';
+    });
+
     try {
         const response = await fetch(`${CONFIG.apiUrl}/candidats`, {
             headers: { 'Accept': 'application/json' }
@@ -184,11 +190,16 @@ async function loadCandidates() {
         }
     } catch (error) {
         console.error('Erreur chargement candidats:', error);
+        // En cas d'erreur, remettre 0
+        ['DWM', 'PM', 'MMV', 'BTP', 'TEA'].forEach(f => {
+            const el = document.getElementById(`count-${f}`);
+            if (el) el.textContent = '–';
+        });
     }
 }
 
 function organizeCandidatesByFiliere() {
-    appState.candidatsParFiliere = { DWM: [], PM: [], MMV: [], BTP: [], EA: [] };
+    appState.candidatsParFiliere = { DWM: [], PM: [], MMV: [], BTP: [], TEA: [] };
 
     appState.candidats.forEach(c => {
         if (appState.candidatsParFiliere[c.filiere]) {
@@ -198,7 +209,7 @@ function organizeCandidatesByFiliere() {
 }
 
 function updateFiliereCounters() {
-    ['DWM', 'PM', 'MMV', 'BTP', 'EA'].forEach(f => {
+    ['DWM', 'PM', 'MMV', 'BTP', 'TEA'].forEach(f => {
         const el = document.getElementById(`count-${f}`);
         if (el) el.textContent = appState.candidatsParFiliere[f].length;
     });
@@ -536,6 +547,14 @@ function scrollToFilieres() {
     hideFiliere();
 }
 
+function returnToCurrentFiliere() {
+    if (appState.currentFiliere) {
+        showFiliere(appState.currentFiliere);
+    } else {
+        hideFiliere();
+    }
+}
+
 function scrollToDonation() {
     const el = document.getElementById('donation');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -629,9 +648,9 @@ function showSuccessModal() {
             <h2 class="success-modal-title">${titre}</h2>
             <p class="success-modal-text">${texte}</p>
             ${detailsHtml}
-            <button class="success-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay')); scrollToFilieres();">
+            <button class="success-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay')); returnToCurrentFiliere();">
                 <i class="fas fa-arrow-left"></i>
-                <span>Retour aux filières</span>
+                <span>Continuer</span>
             </button>
         </div>
     `;
@@ -699,9 +718,9 @@ function showFailureModal() {
                 Vous pouvez réessayer à tout moment.
             </p>
             ${detailsHtml}
-            <button class="success-modal-btn failure-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay')); scrollToFilieres();">
-                <i class="fas fa-arrow-left"></i>
-                <span>Retour aux filières</span>
+            <button class="success-modal-btn failure-modal-btn" onclick="closeSuccessModal(this.closest('.success-modal-overlay')); returnToCurrentFiliere();">
+                <i class="fas fa-redo"></i>
+                <span>Réessayer</span>
             </button>
         </div>
     `;
@@ -781,6 +800,7 @@ window.decrementVotes = decrementVotes;
 window.setVotes = setVotes;
 window.processPayment = processPayment;
 window.scrollToFilieres = scrollToFilieres;
+window.returnToCurrentFiliere = returnToCurrentFiliere;
 window.scrollToDonation = scrollToDonation;
 window.setDonation = setDonation;
 window.processDonation = processDonation;

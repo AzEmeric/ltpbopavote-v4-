@@ -25,7 +25,7 @@ return [
         'PM'  => 'Producteur Multimédia',
         'MMV' => 'Métier de la Mode et Vêtement',
         'BTP' => 'Bâtiment et Travaux Publics',
-        'EA'  => 'Électronique Appliquée',
+        'TEA' => 'Technicien en Électronique Appliquée',
     ],
 
     /*

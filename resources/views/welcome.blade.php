@@ -129,7 +129,7 @@
                 </div>
                 <div class="hero-info-divider"></div>
                 <div class="hero-info-item">
-                    Filières <strong>4</strong>
+                    Filières <strong>5</strong>
                 </div>
                 <div class="hero-info-divider"></div>
                 <div class="hero-info-item">
@@ -164,6 +164,7 @@
                         ['code' => 'PM',  'name' => 'Producteur Multimédia',       'icon' => 'fa-film',          'desc' => 'Production audiovisuelle, montage et création de contenu'],
                         ['code' => 'MMV', 'name' => 'Mode & Vêtement',             'icon' => 'fa-scissors',      'desc' => 'Stylisme, couture et design de mode'],
                         ['code' => 'BTP', 'name' => 'Bâtiment & Travaux Publics',  'icon' => 'fa-helmet-safety', 'desc' => 'Construction, génie civil et aménagement'],
+                        ['code' => 'TEA', 'name' => 'Électronique Appliquée',      'icon' => 'fa-microchip',     'desc' => 'Électronique, circuits et systèmes embarqués'],
                     ];
                 @endphp
 

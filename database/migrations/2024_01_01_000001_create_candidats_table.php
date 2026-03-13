@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom', 100);
             $table->string('prenom', 100);
-            $table->string('filiere', 10)->index();              // DWM, PM, MMV, BTP, EA
+            $table->string('filiere', 10)->index();              // DWM, PM, MMV, BTP, TEA
             $table->string('photo_url', 500)->nullable();
             $table->text('description')->nullable();
             $table->integer('total_votes')->default(0)->index();  // Incrémenté via boot hook Vote
