@@ -12,8 +12,11 @@ class CandidatSeeder extends Seeder
      */
     public function run(): void
     {
-        // Vider la table d'abord
-        Candidat::truncate();
+        // Sécurité : bloquer le seed en production pour éviter toute perte de données
+        if (app()->environment('production')) {
+            $this->command->error('⛔ SEED BLOQUÉ EN PRODUCTION ! Utilisez des commandes manuelles.');
+            return;
+        }
 
         $candidats = [
             // Filière BTP - Bâtiment et Travaux Publics
@@ -393,10 +396,27 @@ class CandidatSeeder extends Seeder
             ],
         ];
 
+        $created = 0;
+        $updated = 0;
+
         foreach ($candidats as $candidat) {
-            Candidat::create($candidat);
+            $existing = Candidat::where('nom', $candidat['nom'])
+                ->where('prenom', $candidat['prenom'])
+                ->where('filiere', $candidat['filiere'])
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'photo_url' => $candidat['photo_url'],
+                    'description' => $candidat['description'],
+                ]);
+                $updated++;
+            } else {
+                Candidat::create($candidat);
+                $created++;
+            }
         }
 
-        $this->command->info('✅ ' . count($candidats) . ' candidats créés avec succès !');
+        $this->command->info("✅ Candidats : {$created} créés, {$updated} mis à jour.");
     }
 }

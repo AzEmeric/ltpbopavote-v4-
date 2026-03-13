@@ -14,7 +14,7 @@ class CandidatController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $candidats = Candidat::populaires()->get();
+            $candidats = Candidat::where('actif', true)->populaires()->get();
             $filieres = array_keys(config('concours.filieres'));
 
             $parFiliere = [];
@@ -53,7 +53,7 @@ class CandidatController extends Controller
                 ], 400);
             }
 
-            $candidats = Candidat::filiere($filiere)->populaires()->get();
+            $candidats = Candidat::where('actif', true)->filiere($filiere)->populaires()->get();
 
             return response()->json([
                 'success' => true,
@@ -106,8 +106,8 @@ class CandidatController extends Controller
     public function statistiques(): JsonResponse
     {
         try {
-            $totalCandidats = Candidat::count();
-            $totalVotes = Candidat::sum('total_votes');
+            $totalCandidats = Candidat::where('actif', true)->count();
+            $totalVotes = Candidat::where('actif', true)->sum('total_votes');
             $filieres = array_keys(config('concours.filieres'));
 
             $parFiliere = [];
@@ -118,7 +118,7 @@ class CandidatController extends Controller
                 ];
             }
 
-            $topCandidats = Candidat::populaires()->take(5)->get();
+            $topCandidats = Candidat::where('actif', true)->populaires()->take(5)->get();
 
             return response()->json([
                 'success' => true,
