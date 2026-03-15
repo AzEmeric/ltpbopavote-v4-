@@ -495,6 +495,54 @@ body, .hero, .sticky-nav, .filiere-card, .candidate-card, .candidate-body,
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
+/* ── Bandeau Annonce ── */
+/* ── Bandeau Annonce ── */
+.announce-bar {
+    background: linear-gradient(90deg, var(--gold-700), var(--gold-500), var(--gold-700));
+    color: #FFFFFF;
+    position: relative;
+    z-index: 1001;
+    padding: .65rem 1.5rem;
+    text-align: center;
+}
+.announce-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+.announce-text i {
+    font-size: .95rem;
+}
+.announce-text strong {
+    font-weight: 800;
+}
+
+[data-theme="light"] .announce-bar {
+    background: linear-gradient(90deg, var(--gold-600), var(--gold-500), var(--gold-600));
+}
+
+@media (max-width: 768px) {
+    .announce-bar {
+        overflow: hidden;
+        white-space: nowrap;
+        padding: .55rem 0;
+    }
+    .announce-text {
+        display: inline-flex;
+        font-size: .85rem;
+        animation: announce-scroll 12s linear infinite;
+        padding-left: 100%;
+    }
+    @keyframes announce-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+    }
+}
+
 body {
     font-family: var(--font-body);
     color: var(--text-primary);
@@ -1343,6 +1391,52 @@ button { font-family: inherit; cursor: pointer; }
     font-size: .78rem; font-weight: 700; color: var(--white);
 }
 .card-votes i { color: var(--gold-400); font-size: .65rem; }
+
+.btn-share-profil {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .7rem 1rem;
+    margin-top: .5rem;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--gold-500);
+    background: transparent;
+    color: var(--gold-500);
+    font-family: var(--font-body);
+    font-size: .88rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .3s var(--ease);
+    letter-spacing: .02em;
+}
+.btn-share-profil i {
+    font-size: .9rem;
+    transition: transform .3s var(--ease);
+}
+.btn-share-profil:hover {
+    background: var(--gold-500);
+    color: var(--navy-950);
+    box-shadow: var(--shadow-gold);
+    transform: translateY(-1px);
+}
+.btn-share-profil:hover i {
+    transform: rotate(15deg) scale(1.1);
+}
+.btn-share-profil:active {
+    transform: translateY(0);
+}
+
+[data-theme="light"] .btn-share-profil {
+    border-color: var(--gold-600);
+    color: var(--gold-700);
+}
+[data-theme="light"] .btn-share-profil:hover {
+    background: var(--gold-500);
+    color: var(--navy-950);
+}
 
 .candidate-body { padding: 1.5rem; background: #111827; transition: background .4s var(--ease); }
 
@@ -2727,5 +2821,378 @@ button { font-family: inherit; cursor: pointer; }
     }
     .success-modal-title {
         font-size: 1.25rem;
+    }
+}
+
+/* =============================================================
+   PAGE PROFIL CANDIDAT
+   ============================================================= */
+
+.profil-section {
+    padding: 7rem 0 3rem;
+    min-height: 100vh;
+}
+
+.profil-back {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: .95rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    transition: color .2s var(--ease);
+}
+.profil-back:hover {
+    color: var(--gold-500);
+}
+
+.profil-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.profil-photo-wrap {
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+}
+.profil-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s var(--ease);
+}
+.profil-photo-wrap:hover .profil-photo {
+    transform: scale(1.03);
+}
+.profil-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.45) 0%, transparent 50%);
+    pointer-events: none;
+}
+.profil-votes-badge {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(16px);
+    color: white;
+    padding: .6rem 1.2rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 1.15rem;
+    border: 1px solid rgba(255,255,255,.1);
+}
+.profil-votes-badge i {
+    color: var(--red);
+    font-size: .95rem;
+}
+
+.profil-info {
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profil-filiere-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: var(--gold-100);
+    color: var(--gold-500);
+    padding: .3rem .75rem;
+    border-radius: var(--radius-full);
+    font-size: .75rem;
+    font-weight: 600;
+    width: fit-content;
+    margin-bottom: .75rem;
+    border: 1px solid rgba(212,175,55,.15);
+    letter-spacing: .02em;
+}
+.profil-filiere-tag i {
+    font-size: .65rem;
+}
+
+.profil-name {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 .5rem;
+    line-height: 1.2;
+}
+
+.profil-desc {
+    color: var(--text-secondary);
+    font-size: .92rem;
+    line-height: 1.65;
+    margin: 0 0 1.25rem;
+}
+
+.profil-stats {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.25rem;
+    padding: 0;
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+}
+.profil-stat {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: .9rem 0;
+    text-align: center;
+}
+.profil-stat + .profil-stat {
+    border-left: 1px solid var(--card-border);
+}
+.profil-stat-value {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--gold-500);
+    line-height: 1.2;
+}
+.profil-stat-label {
+    color: var(--text-secondary);
+    font-size: .72rem;
+    font-weight: 500;
+    margin-top: .2rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.profil-progress {
+    margin-bottom: 1.25rem;
+}
+
+.profil-btn-vote {
+    width: auto;
+    padding: .7rem 2rem;
+    font-size: .92rem;
+    margin-bottom: 1.5rem;
+    align-self: flex-start;
+}
+
+/* Boutons de partage */
+.share-section {
+    border-top: 1px solid var(--card-border);
+    padding-top: 1.25rem;
+}
+.share-label {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    color: var(--text-secondary);
+    font-size: .75rem;
+    font-weight: 600;
+    margin: 0 0 .6rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+.share-label i {
+    font-size: .7rem;
+}
+.share-buttons {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .45rem .9rem;
+    border-radius: var(--radius-full);
+    font-size: .78rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all .2s var(--ease);
+    font-family: var(--font-body);
+}
+.share-btn i {
+    font-size: .82rem;
+}
+.share-btn--whatsapp {
+    background: #25D366;
+    color: white;
+}
+.share-btn--whatsapp:hover {
+    background: #1da851;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37,211,102,.3);
+}
+.share-btn--facebook {
+    background: #1877F2;
+    color: white;
+}
+.share-btn--facebook:hover {
+    background: #1565c0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(24,119,242,.3);
+}
+.share-btn--copy {
+    background: var(--navy-700);
+    color: var(--text-secondary);
+    border: 1px solid var(--card-border);
+}
+.share-btn--copy:hover {
+    color: var(--gold-500);
+    border-color: var(--gold-500);
+    transform: translateY(-1px);
+}
+
+[data-theme="light"] .share-btn--copy {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+[data-theme="light"] .share-btn--copy:hover {
+    color: #1e293b;
+    border-color: var(--gold-500);
+}
+
+/* Responsive profil — Tablette */
+@media (max-width: 992px) {
+    .profil-card {
+        grid-template-columns: 45% 1fr;
+    }
+    .profil-photo-wrap {
+        min-height: 400px;
+    }
+    .profil-info {
+        padding: 2rem;
+    }
+}
+
+/* Responsive profil — Mobile */
+@media (max-width: 768px) {
+    .profil-section {
+        padding: 5rem 0 2rem;
+    }
+    .profil-back {
+        margin-bottom: 1.25rem;
+        font-size: .88rem;
+    }
+    .profil-card {
+        grid-template-columns: 1fr;
+        border-radius: var(--radius-xl);
+    }
+    .profil-photo-wrap {
+        min-height: 350px;
+        max-height: none;
+    }
+    .profil-photo {
+        position: relative;
+        inset: auto;
+    }
+    .profil-info {
+        padding: 1.25rem;
+    }
+    .profil-filiere-tag {
+        font-size: .72rem;
+    }
+    .profil-name {
+        font-size: 1.5rem;
+    }
+    .profil-desc {
+        font-size: .88rem;
+    }
+    .profil-stat-value {
+        font-size: 1.1rem;
+    }
+    .profil-stat-label {
+        font-size: .65rem;
+    }
+    .profil-btn-vote {
+        width: 100%;
+        align-self: stretch;
+        padding: .75rem 1.5rem;
+    }
+    .share-buttons {
+        flex-direction: row;
+    }
+    .share-btn {
+        flex: 1;
+        justify-content: center;
+        padding: .5rem .6rem;
+        font-size: .75rem;
+    }
+    .share-btn i {
+        font-size: .8rem;
+    }
+}
+
+/* Responsive profil — Petit mobile */
+@media (max-width: 400px) {
+    .profil-section {
+        padding: 4.5rem 0 1.5rem;
+    }
+    .profil-card {
+        border-radius: var(--radius-lg);
+    }
+    .profil-photo-wrap {
+        min-height: 300px;
+    }
+    .profil-info {
+        padding: 1rem;
+    }
+    .profil-name {
+        font-size: 1.3rem;
+        margin-bottom: .4rem;
+    }
+    .profil-desc {
+        font-size: .82rem;
+        line-height: 1.55;
+        margin-bottom: 1rem;
+    }
+    .profil-stats {
+        margin-bottom: 1rem;
+    }
+    .profil-stat {
+        padding: .7rem 0;
+    }
+    .profil-stat-value {
+        font-size: 1rem;
+    }
+    .profil-btn-vote {
+        font-size: .85rem;
+        padding: .65rem 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .share-section {
+        padding-top: 1rem;
+    }
+    .share-label {
+        font-size: .7rem;
+        margin-bottom: .5rem;
+    }
+    .share-btn {
+        padding: .4rem .5rem;
+        font-size: .7rem;
+        gap: .3rem;
+    }
+    .profil-votes-badge {
+        bottom: 1rem;
+        left: 1rem;
+        padding: .45rem .9rem;
+        font-size: 1rem;
     }
 }

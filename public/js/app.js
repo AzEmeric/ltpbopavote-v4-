@@ -50,7 +50,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     initEventListeners();
     initStickyNav();
     initRevealObserver();
-    await loadCandidates();
+    initMarqueeCountdown();
+
+    // Charger les candidats uniquement sur la page d'accueil
+    const isHomePage = document.getElementById('filieres');
+    if (isHomePage) {
+        await loadCandidates();
+    }
 
     // Retour après paiement Moneroo : ouvrir la filière du candidat voté
     const params = new URLSearchParams(window.location.search);
@@ -79,8 +85,16 @@ function initStickyNav() {
     const nav = document.getElementById('stickyNav');
     if (!nav) return;
 
+    const hero = document.querySelector('.hero');
+
+    // Pas de hero (page profil, etc.) → navbar toujours visible
+    if (!hero) {
+        nav.classList.add('visible');
+        return;
+    }
+
     let lastScroll = 0;
-    const heroHeight = document.querySelector('.hero')?.offsetHeight || 600;
+    const heroHeight = hero.offsetHeight;
 
     window.addEventListener('scroll', () => {
         const y = window.scrollY;
@@ -280,6 +294,10 @@ function renderCandidates() {
                     <i class="fas fa-heart"></i>
                     <span>Voter pour ${escapeHtml(c.prenom)}</span>
                 </button>
+                <a href="${CONFIG.baseUrl}/candidat/${c.id}" class="btn-share-profil" onclick="event.stopPropagation()">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Partager le profil</span>
+                </a>
             </div>
         </div>`;
     }).join('');
@@ -780,6 +798,43 @@ async function processDonation() {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
     }
+}
+
+// ========================================
+// MARQUEE COMPTE À REBOURS
+// ========================================
+
+function initMarqueeCountdown() {
+    const deadline = new Date('2026-03-23T00:00:00+01:00'); // Lundi 23 mars 00h (Bénin WAT)
+
+    function update() {
+        const el = document.getElementById('marqueeCountdown');
+        if (!el) return;
+
+        const now = new Date();
+        const diff = deadline - now;
+
+        if (diff <= 0) {
+            el.textContent = 'Votes terminés !';
+            const bar = document.getElementById('marqueeBar');
+            if (bar) bar.style.background = 'linear-gradient(90deg, #EF4444, #DC2626, #EF4444)';
+            return;
+        }
+
+        const jours = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const heures = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secondes = Math.floor((diff % (1000 * 60)) / 1000);
+
+        let texte = '';
+        if (jours > 0) texte += `${jours}j `;
+        texte += `${String(heures).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}min ${String(secondes).padStart(2, '0')}s`;
+
+        el.textContent = texte;
+    }
+
+    update();
+    setInterval(update, 1000);
 }
 
 // ========================================

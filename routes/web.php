@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CandidatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +22,9 @@ Route::get('/don', function () {
 Route::get('/mes-votes', function () {
     return view('mes-votes');
 })->name('mes-votes');
+
+// Page profil candidat (lien partageable)
+Route::get('/candidat/{id}', [CandidatController::class, 'profil'])->name('candidat.profil');
 
 // Retour après paiement Moneroo (vérifie le statut puis redirige vers l'accueil)
 Route::get('/paiement/retour', [PaymentController::class, 'retourPaiement'])->name('paiement.retour');
