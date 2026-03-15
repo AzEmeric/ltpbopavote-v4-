@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Candidat;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 
 class CandidatController extends Controller
 {
@@ -98,6 +99,35 @@ class CandidatController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    /**
+     * Afficher la page profil d'un candidat (lien partageable)
+     */
+    public function profil(int $id): View
+    {
+        // Une seule requête pour le candidat + stats agrégées des votes
+        $candidat = Candidat::where('actif', true)->findOrFail($id);
+
+        $stats = $candidat->votesReussis()
+            ->selectRaw('COUNT(*) as total_transactions, COALESCE(SUM(montant_total), 0) as montant_collecte')
+            ->first();
+
+        $statistiques = [
+            'total_votes' => $candidat->total_votes,
+            'total_transactions' => $stats->total_transactions ?? 0,
+            'montant_collecte' => $stats->montant_collecte ?? 0,
+        ];
+
+        // Rang + total en une seule requête
+        $filiereCandidats = Candidat::where('actif', true)
+            ->where('filiere', $candidat->filiere)
+            ->pluck('total_votes');
+
+        $totalDansFiliere = $filiereCandidats->count();
+        $rang = $filiereCandidats->filter(fn ($v) => $v > $candidat->total_votes)->count() + 1;
+
+        return view('candidat.profil', compact('candidat', 'statistiques', 'rang', 'totalDansFiliere'));
     }
 
     /**
