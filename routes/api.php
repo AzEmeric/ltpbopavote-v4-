@@ -36,6 +36,9 @@ Route::prefix('payment')->group(function () {
     // Initier un paiement (don)
     Route::post('/don', [PaymentController::class, 'initierDon'])->name('api.payment.don');
 
+    // Webhook Moneroo (notification asynchrone de paiement)
+    Route::post('/moneroo/webhook', [PaymentController::class, 'webhookMoneroo'])->name('api.payment.moneroo.webhook');
+
     // Vérifier le statut d'un paiement
     Route::get('/verifier', [PaymentController::class, 'verifierDepot'])->name('api.payment.verifier');
 

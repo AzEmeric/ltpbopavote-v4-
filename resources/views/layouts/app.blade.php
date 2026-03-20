@@ -29,7 +29,8 @@
     <div class="announce-bar" id="marqueeBar">
         <span class="announce-text">
             <i class="fas fa-fire"></i>
-            Participez à la réussite de votre candidat ! Clôture <strong>lundi 23 mars à 00h</strong> &mdash; <span id="marqueeCountdown"></span>
+            Participez à la réussite de votre candidat ! Clôture <strong>lundi 23 mars à 00h</strong> &mdash;
+            <span class="countdown-badge" id="marqueeCountdown"></span>
         </span>
     </div>
 
