@@ -56,6 +56,7 @@ return [
 
     'moneroo' => [
         'secret_key' => env('MONEROO_SECRET_KEY'),
+        'webhook_secret' => env('MONEROO_WEBHOOK_SECRET'),
     ],
 
     // Activer la simulation de paiement (développement uniquement)

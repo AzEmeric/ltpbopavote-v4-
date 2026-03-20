@@ -58,22 +58,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadCandidates();
     }
 
-    // Retour après paiement Moneroo : ouvrir la filière du candidat voté
+    // Retour après paiement Moneroo : vérifier le statut et ouvrir la filière
     const params = new URLSearchParams(window.location.search);
     if (params.has('paymentId')) {
+        const paymentId = params.get('paymentId');
         const filiere = localStorage.getItem('retour_filiere');
         localStorage.removeItem('retour_filiere');
         if (filiere) {
             showFiliere(filiere);
         }
-        const status = params.get('paymentStatus');
-        if (status === 'success') {
-            showSuccessModal();
-        } else if (status === 'failed' || status === 'cancelled' || status === 'error') {
-            showFailureModal();
-        }
-        // Nettoyer l'URL
+
+        // Nettoyer l'URL immédiatement
         window.history.replaceState({}, '', '/');
+
+        // Vérifier le statut réel via l'API (polling si encore en attente)
+        await verifierRetourPaiement(paymentId);
     }
 });
 
@@ -494,6 +493,44 @@ async function processPayment() {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
     }
+}
+
+// ========================================
+// VERIFICATION RETOUR PAIEMENT (polling)
+// ========================================
+
+async function verifierRetourPaiement(paymentId) {
+    const maxTentatives = 10;
+    const delai = 3000; // 3 secondes entre chaque tentative
+
+    for (let i = 0; i < maxTentatives; i++) {
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/payment/verifier?payment_id=${encodeURIComponent(paymentId)}`);
+            const data = await response.json();
+
+            if (data.success && data.statut !== 'en_attente') {
+                if (data.paiement_reussi) {
+                    // Recharger les candidats pour mettre à jour les compteurs
+                    await loadCandidates();
+                    showSuccessModal();
+                } else {
+                    showFailureModal();
+                }
+                return;
+            }
+
+            // Encore en attente : attendre avant de réessayer
+            if (i < maxTentatives - 1) {
+                await new Promise(resolve => setTimeout(resolve, delai));
+            }
+        } catch (err) {
+            console.error('Erreur vérification paiement:', err);
+            break;
+        }
+    }
+
+    // Après toutes les tentatives, toujours en attente
+    showToast('Votre paiement est en cours de vérification. Consultez "Mes votes" dans quelques minutes.', 'info');
 }
 
 // ========================================

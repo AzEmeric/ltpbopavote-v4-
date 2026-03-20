@@ -15,7 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Faire confiance à tous les proxies (Railway, Cloudflare, etc.)
         $middleware->trustProxies(at: '*');
 
-        // Pas de webhook à exclure du CSRF (Moneroo utilise la redirection)
+        // Exclure le webhook Moneroo du CSRF (les routes API n'ont pas CSRF par défaut,
+        // mais on l'exclut explicitement au cas où)
+        $middleware->validateCsrfTokens(except: [
+            'api/payment/moneroo/webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

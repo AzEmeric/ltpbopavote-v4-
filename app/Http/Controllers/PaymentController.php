@@ -211,13 +211,27 @@ class PaymentController extends Controller
         $paymentId = $request->query('paymentId');
 
         if ($paymentId) {
-            try {
-                $this->moneroo()->traiterRetour($paymentId);
-            } catch (\Exception $e) {
-                Log::error('Erreur traitement retour Moneroo', [
-                    'payment_id' => $paymentId,
-                    'error' => $e->getMessage(),
-                ]);
+            // Tenter la vérification avec retry (Moneroo peut avoir un léger délai)
+            $maxRetries = 3;
+            for ($i = 0; $i < $maxRetries; $i++) {
+                try {
+                    $result = $this->moneroo()->traiterRetour($paymentId);
+                    // Si le statut est final, on arrête
+                    if (($result['statut'] ?? '') !== 'en_attente') {
+                        break;
+                    }
+                    // Attendre 2 secondes avant de réessayer
+                    if ($i < $maxRetries - 1) {
+                        usleep(2_000_000);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Erreur traitement retour Moneroo', [
+                        'payment_id' => $paymentId,
+                        'tentative' => $i + 1,
+                        'error' => $e->getMessage(),
+                    ]);
+                    break;
+                }
             }
         }
 
@@ -231,6 +245,62 @@ class PaymentController extends Controller
         }
 
         return redirect('/?' . http_build_query($query));
+    }
+
+    /**
+     * Webhook Moneroo — reçoit les notifications asynchrones de paiement
+     */
+    public function webhookMoneroo(Request $request): JsonResponse
+    {
+        Log::info('Webhook Moneroo reçu', [
+            'payload' => $request->all(),
+        ]);
+
+        // Vérifier la signature du webhook
+        $webhookSecret = config('concours.moneroo.webhook_secret');
+        $signature = $request->header('X-Moneroo-Signature') ?? $request->header('moneroo-signature');
+
+        if ($webhookSecret && $signature) {
+            $computedHash = hash('sha256', $request->getContent() . $webhookSecret);
+            if (!hash_equals($computedHash, $signature)) {
+                Log::warning('Webhook Moneroo : signature invalide');
+                return response()->json(['success' => false, 'message' => 'Signature invalide'], 403);
+            }
+        }
+
+        try {
+            $data = $request->all();
+            $paymentId = $data['data']['id'] ?? null;
+
+            if (!$paymentId) {
+                Log::warning('Webhook Moneroo : paymentId manquant', ['payload' => $data]);
+                return response()->json(['success' => false, 'message' => 'paymentId manquant'], 400);
+            }
+
+            $transaction = Transaction::where('deposit_id', $paymentId)->first();
+
+            if (!$transaction) {
+                Log::warning('Webhook Moneroo : transaction introuvable', ['payment_id' => $paymentId]);
+                return response()->json(['success' => false, 'message' => 'Transaction introuvable'], 404);
+            }
+
+            // Si déjà traité, ignorer
+            if ($transaction->statut !== Transaction::STATUT_EN_ATTENTE) {
+                return response()->json(['success' => true, 'message' => 'Déjà traité']);
+            }
+
+            // Vérifier via l'API Moneroo pour confirmer le statut
+            $this->moneroo()->verifierPaiement($paymentId);
+
+            return response()->json(['success' => true, 'message' => 'Webhook traité']);
+        } catch (\Exception $e) {
+            Log::error('Erreur webhook Moneroo', [
+                'error' => $e->getMessage(),
+                'payload' => $request->all(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Reçu']);
+        }
     }
 
     /**
