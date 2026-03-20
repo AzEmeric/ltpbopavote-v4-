@@ -504,6 +504,7 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     z-index: 1001;
     padding: .65rem 1.5rem;
     text-align: center;
+    transition: background .5s ease;
 }
 .announce-text {
     display: inline-flex;
@@ -521,6 +522,64 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     font-weight: 800;
 }
 
+/* Countdown badge */
+.countdown-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(0, 0, 0, .2);
+    padding: .2rem .6rem;
+    border-radius: 6px;
+    margin-left: .25rem;
+    font-variant-numeric: tabular-nums;
+}
+.cd-block {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
+}
+.cd-num {
+    font-size: 1.05em;
+    font-weight: 800;
+    min-width: 1.3em;
+    text-align: center;
+}
+.cd-label {
+    font-size: .75em;
+    font-weight: 600;
+    opacity: .85;
+}
+.cd-sep {
+    opacity: .5;
+    margin: 0 1px;
+    font-weight: 400;
+}
+
+/* Urgence progressive */
+.urgency-medium .countdown-badge {
+    background: rgba(0, 0, 0, .3);
+}
+.urgency-high .countdown-badge {
+    background: rgba(0, 0, 0, .35);
+    animation: pulse-badge 1.5s ease-in-out infinite;
+}
+.urgency-critical .countdown-badge {
+    background: rgba(0, 0, 0, .4);
+    animation: pulse-badge .8s ease-in-out infinite;
+}
+.urgency-high .announce-text > i:first-child,
+.urgency-critical .announce-text > i:first-child {
+    animation: flame-pulse 1s ease-in-out infinite;
+}
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+@keyframes flame-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+}
+
 [data-theme="light"] .announce-bar {
     background: linear-gradient(90deg, var(--gold-600), var(--gold-500), var(--gold-600));
 }
@@ -534,8 +593,12 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     .announce-text {
         display: inline-flex;
         font-size: .85rem;
-        animation: announce-scroll 12s linear infinite;
+        animation: announce-scroll 28s linear infinite;
         padding-left: 100%;
+    }
+    .countdown-badge {
+        padding: .15rem .4rem;
+        border-radius: 4px;
     }
     @keyframes announce-scroll {
         0% { transform: translateX(0); }
@@ -3023,6 +3086,7 @@ button { font-family: inherit; cursor: pointer; }
     font-size: .78rem;
     font-weight: 600;
     border: none;
+    white-space: nowrap;
     cursor: pointer;
     transition: all .2s var(--ease);
     font-family: var(--font-body);
