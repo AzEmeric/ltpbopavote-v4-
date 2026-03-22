@@ -37,6 +37,12 @@ class PaymentController extends Controller
             }
         }
 
+        // Rediriger vers la page de fin si les votes sont clôturés
+        $deadline = config('concours.vote_deadline');
+        if ($deadline && now()->greaterThan(new \DateTime($deadline))) {
+            return view('fin-votes');
+        }
+
         return view('welcome');
     }
 

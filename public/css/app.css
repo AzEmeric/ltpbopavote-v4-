@@ -584,6 +584,60 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     background: linear-gradient(90deg, var(--gold-600), var(--gold-500), var(--gold-600));
 }
 
+/* Urgence finale — 30 dernières minutes */
+.urgency-final .announce-text {
+    flex-direction: column;
+    gap: .15rem;
+    animation: none !important;
+    padding-left: 0 !important;
+    transform: none !important;
+}
+.urgency-final .announce-label {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    opacity: .9;
+}
+.urgency-final .countdown-badge {
+    background: rgba(0, 0, 0, .3);
+    padding: .5rem 1.5rem;
+    border-radius: 10px;
+    gap: 6px;
+    animation: pulse-final 1s ease-in-out infinite;
+}
+.urgency-final .cd-num {
+    font-size: 2rem;
+    min-width: 1.6em;
+}
+.urgency-final .cd-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+.urgency-final .cd-sep {
+    font-size: 1.5rem;
+    margin: 0 2px;
+    animation: blink-sep .8s ease-in-out infinite;
+}
+.urgency-final.announce-bar {
+    padding: .8rem 1.5rem;
+    background: linear-gradient(90deg, #7F1D1D, #DC2626, #7F1D1D) !important;
+    animation: bg-pulse-final 2s ease-in-out infinite;
+}
+@keyframes pulse-final {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+@keyframes blink-sep {
+    0%, 100% { opacity: .8; }
+    50% { opacity: .2; }
+}
+@keyframes bg-pulse-final {
+    0%, 100% { background-size: 100% 100%; filter: brightness(1); }
+    50% { filter: brightness(1.15); }
+}
+
 @media (max-width: 768px) {
     .announce-bar {
         overflow: hidden;
@@ -603,6 +657,28 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     @keyframes announce-scroll {
         0% { transform: translateX(0); }
         100% { transform: translateX(-100%); }
+    }
+    /* Final urgency mobile */
+    .urgency-final.announce-bar {
+        overflow: visible;
+        white-space: normal;
+        padding: .6rem 1rem;
+    }
+    .urgency-final .announce-text {
+        white-space: normal;
+    }
+    .urgency-final .countdown-badge {
+        padding: .4rem 1rem;
+    }
+    .urgency-final .cd-num {
+        font-size: 1.5rem;
+        min-width: 1.4em;
+    }
+    .urgency-final .cd-sep {
+        font-size: 1.1rem;
+    }
+    .urgency-final .announce-label {
+        font-size: .7rem;
     }
 }
 
