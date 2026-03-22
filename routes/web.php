@@ -15,6 +15,10 @@ Route::get('/', [PaymentController::class, 'accueil'])->name('home');
 
 // Page de don
 Route::get('/don', function () {
+    $deadline = config('concours.vote_deadline');
+    if ($deadline && now()->greaterThan(new \DateTime($deadline))) {
+        return view('fin-votes');
+    }
     return view('don');
 })->name('don');
 

@@ -34,6 +34,9 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    // Date et heure de clôture des votes (format ISO 8601, fuseau Bénin WAT +01:00)
+    'vote_deadline' => env('VOTE_DEADLINE', '2026-03-23T23:59:00+01:00'),
+
     // Nombre maximum de votes par transaction
     'max_votes_per_transaction' => 900,
 

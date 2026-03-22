@@ -842,21 +842,25 @@ async function processDonation() {
 // ========================================
 
 function initMarqueeCountdown() {
-    const deadline = new Date('2026-03-23T00:00:00+01:00'); // Lundi 23 mars 00h (Bénin WAT)
+    const deadline = new Date('2026-03-23T23:59:00+01:00'); // Lundi 23 mars 23h59 (Bénin WAT)
+
+    var finalMode = false;
 
     function update() {
-        const el = document.getElementById('marqueeCountdown');
         const bar = document.getElementById('marqueeBar');
-        if (!el) return;
+        if (!bar) return;
 
         const now = new Date();
         const diff = deadline - now;
 
         if (diff <= 0) {
-            el.innerHTML = '<i class="fas fa-times-circle"></i> Votes terminés !';
-            if (bar) {
-                bar.style.background = 'linear-gradient(90deg, #991B1B, #DC2626, #991B1B)';
-                bar.classList.add('urgency-critical');
+            const textEl = bar.querySelector('.announce-text');
+            if (textEl) textEl.innerHTML = '<i class="fas fa-times-circle"></i> Votes terminés !';
+            bar.style.background = 'linear-gradient(90deg, #991B1B, #DC2626, #991B1B)';
+            bar.classList.add('urgency-critical');
+            bar.classList.remove('urgency-final');
+            if (!document.querySelector('.fin-page')) {
+                setTimeout(function() { window.location.reload(); }, 2000);
             }
             return;
         }
@@ -866,34 +870,53 @@ function initMarqueeCountdown() {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secondes = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // Formatage avec blocs séparés pour chaque unité
         let parts = [];
         if (jours > 0) parts.push(`<span class="cd-block"><span class="cd-num">${jours}</span><span class="cd-label">j</span></span>`);
         parts.push(`<span class="cd-block"><span class="cd-num">${String(heures).padStart(2, '0')}</span><span class="cd-label">h</span></span>`);
         parts.push(`<span class="cd-block"><span class="cd-num">${String(minutes).padStart(2, '0')}</span><span class="cd-label">min</span></span>`);
         parts.push(`<span class="cd-block"><span class="cd-num">${String(secondes).padStart(2, '0')}</span><span class="cd-label">s</span></span>`);
 
-        el.innerHTML = parts.join('<span class="cd-sep">:</span>');
+        const countdownHtml = parts.join('<span class="cd-sep">:</span>');
+        const totalMinutes = diff / (1000 * 60);
 
-        // Urgence progressive selon le temps restant
-        if (bar) {
+        if (totalMinutes <= 30) {
+            // Mode urgence finale — countdown seul, gros, centré
+            bar.classList.add('urgency-final');
+            bar.classList.remove('urgency-critical', 'urgency-high', 'urgency-medium');
+            bar.style.background = '';
+
+            if (!finalMode) {
+                // Restructurer le HTML une seule fois
+                const textEl = bar.querySelector('.announce-text');
+                if (textEl) {
+                    textEl.innerHTML =
+                        '<span class="announce-label"><i class="fas fa-clock"></i> Fin des votes dans</span>' +
+                        '<span class="countdown-badge" id="finalCountdown"></span>';
+                }
+                finalMode = true;
+            }
+
+            const fc = document.getElementById('finalCountdown');
+            if (fc) fc.innerHTML = countdownHtml;
+        } else {
+            // Mode normal
+            const el = document.getElementById('marqueeCountdown');
+            if (el) el.innerHTML = countdownHtml;
+
+            bar.classList.remove('urgency-final');
             if (jours === 0 && heures < 6) {
-                // Moins de 6h : rouge critique + pulse
                 bar.style.background = 'linear-gradient(90deg, #991B1B, #DC2626, #991B1B)';
                 bar.classList.add('urgency-critical');
                 bar.classList.remove('urgency-high', 'urgency-medium');
             } else if (jours === 0) {
-                // Moins de 24h : rouge
                 bar.style.background = 'linear-gradient(90deg, #B91C1C, #EF4444, #B91C1C)';
                 bar.classList.add('urgency-high');
                 bar.classList.remove('urgency-critical', 'urgency-medium');
             } else if (jours <= 1) {
-                // 1 jour : orange-rouge
                 bar.style.background = 'linear-gradient(90deg, #C2410C, #EA580C, #C2410C)';
                 bar.classList.add('urgency-medium');
                 bar.classList.remove('urgency-critical', 'urgency-high');
             } else {
-                // Plus de 1 jour : doré normal
                 bar.classList.remove('urgency-critical', 'urgency-high', 'urgency-medium');
             }
         }
