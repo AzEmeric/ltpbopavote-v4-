@@ -44,14 +44,15 @@
 
     .fin-page {
         min-height: 100vh;
-        padding-top: 4.5rem;
+        padding-top: 5rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         position: relative;
         overflow: hidden;
-        padding: 2rem 1rem;
+        padding-bottom: 2rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     /* Background animation */
@@ -229,6 +230,131 @@
         margin: 0;
     }
 
+    /* Classement */
+    .fin-classement {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto 3rem;
+        text-align: left;
+    }
+    .fin-classement-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.3rem, 3vw, 1.8rem);
+        font-weight: 900;
+        color: var(--text-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .fin-classement-title span {
+        color: var(--gold-500);
+    }
+    .fin-filiere-block {
+        margin-bottom: 2rem;
+    }
+    .fin-filiere-header {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin-bottom: .75rem;
+        padding-bottom: .5rem;
+        border-bottom: 2px solid var(--border);
+    }
+    .fin-filiere-badge {
+        background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+        color: #000;
+        font-size: .75rem;
+        font-weight: 800;
+        padding: .25rem .65rem;
+        border-radius: var(--radius-full);
+        letter-spacing: .04em;
+    }
+    .fin-filiere-name {
+        font-size: .9rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+    .fin-candidat-row {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .6rem .75rem;
+        border-radius: var(--radius);
+        transition: background .2s;
+    }
+    .fin-candidat-row:hover {
+        background: var(--bg-card-hover);
+    }
+    .fin-candidat-rank {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .8rem;
+        font-weight: 800;
+        flex-shrink: 0;
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+    .fin-candidat-row:nth-child(1) .fin-candidat-rank {
+        background: linear-gradient(135deg, #D4AF37, #F0D96A);
+        color: #000;
+        border: none;
+        box-shadow: 0 2px 8px rgba(212, 175, 55, .3);
+    }
+    .fin-candidat-row:nth-child(2) .fin-candidat-rank {
+        background: linear-gradient(135deg, #94A3B8, #CBD5E1);
+        color: #000;
+        border: none;
+    }
+    .fin-candidat-row:nth-child(3) .fin-candidat-rank {
+        background: linear-gradient(135deg, #B45309, #D97706);
+        color: #fff;
+        border: none;
+    }
+    .fin-candidat-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .fin-candidat-name {
+        font-weight: 700;
+        font-size: .95rem;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .fin-candidat-votes {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1rem;
+        color: var(--gold-500);
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    .fin-candidat-bar-bg {
+        flex: 1;
+        max-width: 120px;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--bg-surface);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .fin-candidat-bar {
+        height: 100%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, var(--gold-500), var(--gold-400));
+        transition: width .6s var(--ease);
+    }
+    .fin-classement-loading {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+
     /* CTA Buttons */
     .fin-actions {
         display: flex;
@@ -305,7 +431,10 @@
     /* Responsive */
     @media (max-width: 768px) {
         .fin-page {
-            padding: 4.5rem 1rem 2rem;
+            padding: 4.5rem .75rem 2rem;
+        }
+        .fin-candidat-bar-bg {
+            max-width: 60px;
         }
         .fin-trophy {
             font-size: 3.5rem;
@@ -356,6 +485,19 @@
         }
         .fin-divider {
             margin-bottom: 1.5rem;
+        }
+        .fin-candidat-row {
+            padding: .5rem .5rem;
+            gap: .5rem;
+        }
+        .fin-candidat-name {
+            font-size: .85rem;
+        }
+        .fin-candidat-votes {
+            font-size: .85rem;
+        }
+        .fin-candidat-bar-bg {
+            display: none;
         }
     }
 </style>
@@ -428,6 +570,19 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- Classement par filière -->
+        <div class="fin-classement" id="classementSection">
+            <h2 class="fin-classement-title">Classement <span>par filière</span></h2>
+            <div id="classementContainer">
+                <div class="fin-classement-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Chargement du classement...
+                </div>
+            </div>
+        </div>
+
+        <div class="fin-content">
             <!-- Actions -->
             <div class="fin-actions">
                 <a href="/mes-votes" class="fin-btn fin-btn-primary">
@@ -483,6 +638,73 @@
             }
         }, 600);
     })();
+
+    // Classement par filière
+    const filiereNames = {
+        'DWM': 'Développement Web et Mobile',
+        'PM': 'Producteur Multimédia',
+        'MMV': 'Métier de la Mode et Vêtement',
+        'BTP': 'Bâtiment et Travaux Publics',
+        'TEA': 'Technicien en Électronique Appliquée'
+    };
+    const filiereOrder = ['DWM', 'PM', 'MMV', 'BTP', 'TEA'];
+
+    fetch(APP_CONFIG.apiUrl + '/candidats?_t=' + Date.now())
+        .then(r => r.json())
+        .then(data => {
+            const candidats = data.candidats || data.data || data;
+            if (!Array.isArray(candidats)) return;
+
+            // Grouper par filière
+            const parFiliere = {};
+            candidats.forEach(c => {
+                const f = c.filiere;
+                if (!parFiliere[f]) parFiliere[f] = [];
+                parFiliere[f].push(c);
+            });
+
+            // Trier chaque filière par votes décroissants
+            Object.keys(parFiliere).forEach(f => {
+                parFiliere[f].sort((a, b) => (b.total_votes || 0) - (a.total_votes || 0));
+            });
+
+            const container = document.getElementById('classementContainer');
+            let html = '';
+
+            filiereOrder.forEach(code => {
+                const liste = parFiliere[code];
+                if (!liste || !liste.length) return;
+
+                const maxVotes = liste[0].total_votes || 1;
+
+                html += '<div class="fin-filiere-block">';
+                html += '<div class="fin-filiere-header">';
+                html += '<span class="fin-filiere-badge">' + code + '</span>';
+                html += '<span class="fin-filiere-name">' + (filiereNames[code] || code) + '</span>';
+                html += '</div>';
+
+                liste.forEach((c, i) => {
+                    const votes = c.total_votes || 0;
+                    const pct = maxVotes > 0 ? (votes / maxVotes * 100) : 0;
+                    const nom = (c.prenom || '') + ' ' + (c.nom || '');
+
+                    html += '<div class="fin-candidat-row">';
+                    html += '<div class="fin-candidat-rank">' + (i + 1) + '</div>';
+                    html += '<div class="fin-candidat-info"><div class="fin-candidat-name">' + nom + '</div></div>';
+                    html += '<div class="fin-candidat-bar-bg"><div class="fin-candidat-bar" style="width:' + pct + '%"></div></div>';
+                    html += '<div class="fin-candidat-votes">' + votes.toLocaleString('fr-FR') + '</div>';
+                    html += '</div>';
+                });
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        })
+        .catch(() => {
+            document.getElementById('classementContainer').innerHTML =
+                '<p style="text-align:center;color:var(--text-secondary)">Impossible de charger le classement.</p>';
+        });
 
     // Masquer le bandeau countdown sur cette page
     const marquee = document.getElementById('marqueeBar');
